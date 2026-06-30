@@ -69,6 +69,8 @@ const COASTLINE_LINE_WIDTH_FRACTION := 0.0035
 )
 @onready var _hud: Label = $Layout/HBoxContainer/HUDPanel/ScrollContainer/HUD
 @onready var _hud_scroll: ScrollContainer = $Layout/HBoxContainer/HUDPanel/ScrollContainer
+@onready var _subviewport: SubViewport = $Layout/HBoxContainer/SubViewportContainer/SubViewport
+@onready var _route_panel: PanelContainer = $Layout/HBoxContainer/SubViewportContainer/RouteTerrainPanel
 @onready var _cb_land: CheckBox = (
 	$Layout/HBoxContainer/SubViewportContainer/RouteTerrainPanel/MarginContainer/VBoxContainer/Land
 )
@@ -94,6 +96,15 @@ var _route_to_index: int = -1
 
 
 func _ready() -> void:
+	# Godot 4.6 re-saves these on the scene file; set them at runtime to avoid .tscn churn.
+	_subviewport.handle_input_locally = true
+	_route_panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	_route_panel.offset_left = 12.0
+	_route_panel.offset_top = 12.0
+	_route_panel.offset_right = 172.0
+	_route_panel.offset_bottom = 204.0
+	_route_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+
 	_generator = FibonacciSphere.new()
 	_camera.viewport_clicked.connect(_on_viewport_clicked)
 	for checkbox in [_cb_land, _cb_water, _cb_deep_water, _cb_mountain, _cb_ice, _cb_ice_mountain]:
