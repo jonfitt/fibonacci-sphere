@@ -1,8 +1,8 @@
 use std::f64::consts::PI;
 
 use crate::methods::epsilon::{self, AVERAGE_NEIGHBOR_EPSILON};
-use crate::point::SpherePoint;
 use crate::point::GOLDEN_RATIO;
+use crate::point::SpherePoint;
 
 use super::Distribution;
 
@@ -127,7 +127,9 @@ fn offset_lattice(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_helpers::{assert_on_sphere, assert_sequential_indices, assert_unique_positions};
+    use crate::test_helpers::{
+        assert_on_sphere, assert_sequential_indices, assert_unique_positions,
+    };
 
     #[test]
     fn offset_packing_uses_lookup_epsilon() {

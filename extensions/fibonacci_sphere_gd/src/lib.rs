@@ -3,14 +3,16 @@
 #![allow(clippy::too_many_arguments)] // `#[func]` signatures mirror GDScript call sites.
 
 use fibonacci_sphere::{
-    build_combined_terrain_mesh, build_line_ribbon_mesh, build_voronoi_cell_fan_mesh,
-    classify_area_border, classify_site, coastline_segment_positions, is_coastline_border,
-    outward_lift, terrain_rng_from_godot_seed, voronoi_cell_fan_apex, AreaBorderKind,
-    CombinedTerrainMesh, CombinedTerrainMeshOptions, DistributionMethod, LineRibbonMesh,
-    PerlinNoiseConfig, SphereLattice, SurfaceGraph, TerrainAreaPolygon, TerrainMap, TerrainType,
-    VoronoiFanMeshOptions,
+    AreaBorderKind, CombinedTerrainMesh, CombinedTerrainMeshOptions, DistributionMethod,
+    LineRibbonMesh, PerlinNoiseConfig, SphereLattice, SurfaceGraph, TerrainAreaPolygon, TerrainMap,
+    TerrainType, VoronoiFanMeshOptions, build_combined_terrain_mesh, build_line_ribbon_mesh,
+    build_voronoi_cell_fan_mesh, classify_area_border, classify_site, coastline_segment_positions,
+    is_coastline_border, outward_lift, terrain_rng_from_godot_seed, voronoi_cell_fan_apex,
 };
-use godot::builtin::{Array, Color, PackedColorArray, PackedInt32Array, PackedVector3Array, Transform3D, Variant, Vector3};
+use godot::builtin::{
+    Array, Color, PackedColorArray, PackedInt32Array, PackedVector3Array, Transform3D, Variant,
+    Vector3,
+};
 use godot::classes::MultiMesh;
 use godot::prelude::*;
 
@@ -282,11 +284,7 @@ impl FibonacciSphere {
     #[func]
     fn get_terrain_area_polygons(&self) -> Array<Gd<FibonacciTerrainArea>> {
         match self.derived_cache.as_ref() {
-            Some(cache) => cache
-                .polygons
-                .iter()
-                .map(terrain_area_to_gd)
-                .collect(),
+            Some(cache) => cache.polygons.iter().map(terrain_area_to_gd).collect(),
             None => {
                 let Some(lattice) = self.lattice.as_ref() else {
                     godot_error!("fibonacci_sphere: no lattice generated yet");
@@ -411,7 +409,8 @@ impl FibonacciSphere {
             TerrainType::from_godot_index(right),
         ) {
             (Some(left_type), Some(right_type)) => {
-                classify_area_border(classify_site(left_type), classify_site(right_type)).godot_index()
+                classify_area_border(classify_site(left_type), classify_site(right_type))
+                    .godot_index()
             }
             _ => -1,
         }
@@ -460,7 +459,9 @@ impl FibonacciSphere {
     fn vertices_within_north_polar_distance(&self, max_angle: f64) -> PackedInt32Array {
         self.lattice
             .as_ref()
-            .map(|lattice| indices_to_packed(lattice.vertices_within_north_polar_distance(max_angle)))
+            .map(|lattice| {
+                indices_to_packed(lattice.vertices_within_north_polar_distance(max_angle))
+            })
             .unwrap_or_default()
     }
 
@@ -469,7 +470,9 @@ impl FibonacciSphere {
     fn vertices_within_south_polar_distance(&self, max_angle: f64) -> PackedInt32Array {
         self.lattice
             .as_ref()
-            .map(|lattice| indices_to_packed(lattice.vertices_within_south_polar_distance(max_angle)))
+            .map(|lattice| {
+                indices_to_packed(lattice.vertices_within_south_polar_distance(max_angle))
+            })
             .unwrap_or_default()
     }
 
@@ -478,7 +481,9 @@ impl FibonacciSphere {
     fn vertices_within_equatorial_distance(&self, max_angle: f64) -> PackedInt32Array {
         self.lattice
             .as_ref()
-            .map(|lattice| indices_to_packed(lattice.vertices_within_equatorial_distance(max_angle)))
+            .map(|lattice| {
+                indices_to_packed(lattice.vertices_within_equatorial_distance(max_angle))
+            })
             .unwrap_or_default()
     }
 
@@ -522,11 +527,7 @@ impl FibonacciSphere {
 
         let apex = voronoi_cell_fan_apex(index, &positions);
         let radius = lattice.radius() as f32;
-        Vector3::new(
-            apex[0] * radius,
-            apex[1] * radius,
-            apex[2] * radius,
-        )
+        Vector3::new(apex[0] * radius, apex[1] * radius, apex[2] * radius)
     }
 
     /// Vertex indices along the shortest surface path (`[]` on error).
@@ -554,8 +555,13 @@ impl FibonacciSphere {
             return PackedInt32Array::new();
         }
 
-        match self.shortest_surface_path_with_allowed(from_index, to_index, &allowed_terrain_types) {
-            Ok(path) => path.vertices.into_iter().map(|index| index as i32).collect(),
+        match self.shortest_surface_path_with_allowed(from_index, to_index, &allowed_terrain_types)
+        {
+            Ok(path) => path
+                .vertices
+                .into_iter()
+                .map(|index| index as i32)
+                .collect(),
             Err(error) => {
                 godot_error!("fibonacci_sphere: {error}");
                 PackedInt32Array::new()
@@ -565,7 +571,11 @@ impl FibonacciSphere {
 
     /// World positions along the shortest surface path (`[]` on error).
     #[func]
-    fn shortest_surface_path_positions(&self, from_index: i32, to_index: i32) -> PackedVector3Array {
+    fn shortest_surface_path_positions(
+        &self,
+        from_index: i32,
+        to_index: i32,
+    ) -> PackedVector3Array {
         self.shortest_surface_path_positions_with_allowed_terrain(
             from_index,
             to_index,
@@ -586,8 +596,11 @@ impl FibonacciSphere {
             return PackedVector3Array::new();
         }
 
-        let path = match self.shortest_surface_path_with_allowed(from_index, to_index, &allowed_terrain_types)
-        {
+        let path = match self.shortest_surface_path_with_allowed(
+            from_index,
+            to_index,
+            &allowed_terrain_types,
+        ) {
             Ok(path) => path,
             Err(error) => {
                 godot_error!("fibonacci_sphere: {error}");
@@ -629,7 +642,8 @@ impl FibonacciSphere {
             return -1.0;
         }
 
-        match self.shortest_surface_path_with_allowed(from_index, to_index, &allowed_terrain_types) {
+        match self.shortest_surface_path_with_allowed(from_index, to_index, &allowed_terrain_types)
+        {
             Ok(path) => path.length as f32,
             Err(error) => {
                 godot_error!("fibonacci_sphere: {error}");

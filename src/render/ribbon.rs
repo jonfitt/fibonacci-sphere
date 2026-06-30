@@ -103,7 +103,9 @@ fn ribbon_offset(point: [f32; 3], tangent: [f32; 3], half_width: f32) -> [f32; 3
 }
 
 fn coincident(a: [f32; 3], b: [f32; 3]) -> bool {
-    sub(a, b).iter().all(|component| component.abs() <= COINCIDENT_EPS)
+    sub(a, b)
+        .iter()
+        .all(|component| component.abs() <= COINCIDENT_EPS)
 }
 
 fn add(a: [f32; 3], b: [f32; 3]) -> [f32; 3] {

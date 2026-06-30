@@ -1,6 +1,6 @@
 use std::f64::consts::PI;
 
-use crate::point::{SpherePoint, GOLDEN_RATIO};
+use crate::point::{GOLDEN_RATIO, SpherePoint};
 
 use super::Distribution;
 
@@ -81,7 +81,9 @@ pub(crate) fn fibonacci_lattice(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_helpers::{assert_on_sphere, assert_sequential_indices, assert_unique_positions};
+    use crate::test_helpers::{
+        assert_on_sphere, assert_sequential_indices, assert_unique_positions,
+    };
 
     #[test]
     fn canonical_midpoint_count() {
@@ -137,7 +139,10 @@ mod tests {
     fn distribution_metadata() {
         assert_eq!(Canonical.name(), "canonical");
         assert_eq!(CanonicalMidpoint.name(), "canonical_midpoint");
-        assert_eq!(Canonical.optimizes(), super::super::OptimizationGoal::Baseline);
+        assert_eq!(
+            Canonical.optimizes(),
+            super::super::OptimizationGoal::Baseline
+        );
         assert_eq!(
             CanonicalMidpoint.optimizes(),
             super::super::OptimizationGoal::PackingDistance
@@ -147,7 +152,10 @@ mod tests {
     #[test]
     fn on_sphere_and_unique_for_both_variants() {
         for n in [2, 10, 50] {
-            for points in [Canonical.generate(n, 1.5), CanonicalMidpoint.generate(n, 1.5)] {
+            for points in [
+                Canonical.generate(n, 1.5),
+                CanonicalMidpoint.generate(n, 1.5),
+            ] {
                 assert_eq!(points.len(), n);
                 assert_on_sphere(&points, 1.5);
                 assert_sequential_indices(&points);

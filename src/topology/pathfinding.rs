@@ -134,14 +134,9 @@ impl SurfaceGraph {
                 return Err(SphereError::NoSurfacePath { from, to });
             }
 
-            let (vertices, length) = dijkstra_with_allowed(
-                &self.adjacency,
-                from,
-                to,
-                terrain,
-                &allowed_set,
-            )
-            .ok_or(SphereError::NoSurfacePath { from, to })?;
+            let (vertices, length) =
+                dijkstra_with_allowed(&self.adjacency, from, to, terrain, &allowed_set)
+                    .ok_or(SphereError::NoSurfacePath { from, to })?;
 
             return Ok(SurfacePath { vertices, length });
         }
@@ -193,11 +188,7 @@ fn normalize(v: [f32; 3]) -> [f64; 3] {
     if len <= f64::EPSILON {
         return [0.0, 1.0, 0.0];
     }
-    [
-        v[0] as f64 / len,
-        v[1] as f64 / len,
-        v[2] as f64 / len,
-    ]
+    [v[0] as f64 / len, v[1] as f64 / len, v[2] as f64 / len]
 }
 
 fn validate_vertex_index(index: usize, count: usize) -> Result<(), SphereError> {
@@ -295,7 +286,12 @@ fn dijkstra_with_allowed(
     Some(reconstruct_path(start, goal, &came_from, dist[goal]))
 }
 
-fn reconstruct_path(start: usize, goal: usize, came_from: &[Option<usize>], length: f64) -> (Vec<usize>, f64) {
+fn reconstruct_path(
+    start: usize,
+    goal: usize,
+    came_from: &[Option<usize>],
+    length: f64,
+) -> (Vec<usize>, f64) {
     let mut vertices = Vec::new();
     let mut current = goal;
     loop {
@@ -320,8 +316,8 @@ fn vertex_terrain_allowed(
 
 #[cfg(test)]
 mod tests {
-    use crate::methods::DistributionMethod;
     use crate::SphereLattice;
+    use crate::methods::DistributionMethod;
 
     use super::*;
 
@@ -333,7 +329,8 @@ mod tests {
 
     #[test]
     fn trivial_path_has_zero_length() {
-        let lattice = SphereLattice::generate(DistributionMethod::CanonicalMidpoint, 20, 1.0).unwrap();
+        let lattice =
+            SphereLattice::generate(DistributionMethod::CanonicalMidpoint, 20, 1.0).unwrap();
         let graph = SurfaceGraph::from_positions(&lattice.position_arrays());
         let path = graph.shortest_path(3, 3).unwrap();
         assert_eq!(path.vertices, vec![3]);
@@ -342,7 +339,8 @@ mod tests {
 
     #[test]
     fn adjacent_vertices_form_length_one_path() {
-        let lattice = SphereLattice::generate(DistributionMethod::CanonicalMidpoint, 30, 2.0).unwrap();
+        let lattice =
+            SphereLattice::generate(DistributionMethod::CanonicalMidpoint, 30, 2.0).unwrap();
         let positions = lattice.position_arrays();
         let graph = SurfaceGraph::from_positions(&positions);
         let edges = spherical_delaunay_edges(&positions);
@@ -356,7 +354,8 @@ mod tests {
 
     #[test]
     fn delaunay_graph_is_connected_for_midpoint_lattice() {
-        let lattice = SphereLattice::generate(DistributionMethod::CanonicalMidpoint, 60, 1.0).unwrap();
+        let lattice =
+            SphereLattice::generate(DistributionMethod::CanonicalMidpoint, 60, 1.0).unwrap();
         let graph = SurfaceGraph::from_positions(&lattice.position_arrays());
         assert!(is_connected(&graph));
 
@@ -372,7 +371,8 @@ mod tests {
 
     #[test]
     fn path_length_is_sum_of_edge_geodesics() {
-        let lattice = SphereLattice::generate(DistributionMethod::CanonicalMidpoint, 50, 1.5).unwrap();
+        let lattice =
+            SphereLattice::generate(DistributionMethod::CanonicalMidpoint, 50, 1.5).unwrap();
         let positions = lattice.position_arrays();
         let graph = SurfaceGraph::from_positions(&positions);
         let path = graph.shortest_path(0, 17).unwrap();
@@ -398,7 +398,10 @@ mod tests {
         let graph = SurfaceGraph::from_positions(&lattice.position_arrays());
         assert_eq!(
             graph.shortest_path(0, 10),
-            Err(SphereError::InvalidVertexIndex { index: 10, count: 5 })
+            Err(SphereError::InvalidVertexIndex {
+                index: 10,
+                count: 5
+            })
         );
     }
 
@@ -409,7 +412,8 @@ mod tests {
         use rand::SeedableRng;
         use rand::rngs::StdRng;
 
-        let lattice = SphereLattice::generate(DistributionMethod::CanonicalMidpoint, 40, 1.0).unwrap();
+        let lattice =
+            SphereLattice::generate(DistributionMethod::CanonicalMidpoint, 40, 1.0).unwrap();
         let terrain = lattice.generate_terrain(
             PerlinNoiseConfig {
                 seed: Some(7),
@@ -427,9 +431,16 @@ mod tests {
             .find(|&index| terrain.get(index) == TerrainType::Land)
             .expect("expected at least one land vertex");
 
-        assert!(graph
-            .shortest_path_with_allowed_terrain(mountain_index, land_index, terrain.as_slice(), &mountain_only)
-            .is_err());
+        assert!(
+            graph
+                .shortest_path_with_allowed_terrain(
+                    mountain_index,
+                    land_index,
+                    terrain.as_slice(),
+                    &mountain_only
+                )
+                .is_err()
+        );
     }
 
     #[cfg(feature = "terrain")]
@@ -439,7 +450,8 @@ mod tests {
         use rand::SeedableRng;
         use rand::rngs::StdRng;
 
-        let lattice = SphereLattice::generate(DistributionMethod::CanonicalMidpoint, 35, 1.0).unwrap();
+        let lattice =
+            SphereLattice::generate(DistributionMethod::CanonicalMidpoint, 35, 1.0).unwrap();
         let terrain = lattice.generate_terrain(
             PerlinNoiseConfig {
                 seed: Some(3),

@@ -3,7 +3,7 @@ use std::sync::OnceLock;
 use crate::error::SphereError;
 use crate::methods::DistributionMethod;
 use crate::point::SpherePoint;
-use crate::topology::{spherical_delaunay_mesh, SurfaceGraph, SphericalMesh};
+use crate::topology::{SphericalMesh, SurfaceGraph, spherical_delaunay_mesh};
 
 #[derive(Debug, Clone)]
 struct TopologyCache {
@@ -80,10 +80,7 @@ impl SphereLattice {
 
     /// Flat `[x0, y0, z0, x1, y1, z1, ...]` suitable for Godot `PackedVector3Array` FFI.
     pub fn positions_flat(&self) -> Vec<f32> {
-        self.points
-            .iter()
-            .flat_map(|p| p.position)
-            .collect()
+        self.points.iter().flat_map(|p| p.position).collect()
     }
 
     /// Cartesian coordinates as `[x, y, z]` arrays (allocates).
@@ -97,7 +94,9 @@ impl SphereLattice {
     pub fn spherical_mesh(&self) -> SphericalMesh {
         self.topology()
             .map(|cache| cache.mesh.clone())
-            .unwrap_or_else(|| spherical_delaunay_mesh(&self.points.iter().map(|p| p.position).collect::<Vec<_>>()))
+            .unwrap_or_else(|| {
+                spherical_delaunay_mesh(&self.points.iter().map(|p| p.position).collect::<Vec<_>>())
+            })
     }
 
     /// Delaunay triangle faces (connectivity mesh, not area partition).
@@ -134,8 +133,7 @@ impl SphereLattice {
         from_index: usize,
         to_index: usize,
     ) -> Result<crate::topology::SurfacePath, SphereError> {
-        self.surface_graph()
-            .shortest_path(from_index, to_index)
+        self.surface_graph().shortest_path(from_index, to_index)
     }
 
     /// Shortest path that only traverses vertices whose terrain type is in `allowed`.
@@ -322,7 +320,8 @@ mod tests {
 
     #[test]
     fn positions_flat_layout() {
-        let lattice = SphereLattice::generate(DistributionMethod::CanonicalMidpoint, 2, 1.0).unwrap();
+        let lattice =
+            SphereLattice::generate(DistributionMethod::CanonicalMidpoint, 2, 1.0).unwrap();
         let flat = lattice.positions_flat();
         assert_eq!(flat.len(), 6);
         assert_eq!(flat[0..3], lattice.points()[0].position);

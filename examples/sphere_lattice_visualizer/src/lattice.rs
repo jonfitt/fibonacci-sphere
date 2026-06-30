@@ -2,22 +2,19 @@
 
 use bevy::{
     prelude::*,
-    render::{
-        mesh::Indices,
-        render_asset::RenderAssetUsages,
-        render_resource::PrimitiveTopology,
-    },
+    render::{mesh::Indices, render_asset::RenderAssetUsages, render_resource::PrimitiveTopology},
 };
 use fibonacci_sphere::{
-    build_combined_terrain_mesh, spherical_voronoi_border_segments, CombinedTerrainMesh,
-    CombinedTerrainMeshOptions, PerlinNoiseConfig, SphereLattice, TerrainType,
-    VoronoiFanMeshOptions,
+    CombinedTerrainMesh, CombinedTerrainMeshOptions, PerlinNoiseConfig, SphereLattice, TerrainType,
+    VoronoiFanMeshOptions, build_combined_terrain_mesh, spherical_voronoi_border_segments,
 };
 use rand::SeedableRng;
 use rand::rngs::StdRng;
 
 use crate::camera::OrbitCamera;
-use crate::settings::{brightness_at_distance, fade_color, LatticeSyncKey, LatticeSyncState, VizSettings};
+use crate::settings::{
+    LatticeSyncKey, LatticeSyncState, VizSettings, brightness_at_distance, fade_color,
+};
 
 /// Root entity for all lattice point meshes.
 #[derive(Component)]
@@ -291,10 +288,7 @@ pub fn sync_lattice(
 
     let mut raw_wireframe = Vec::new();
     for [a, b] in lattice.wireframe_edges() {
-        raw_wireframe.push((
-            Vec3::from_array(points[a]),
-            Vec3::from_array(points[b]),
-        ));
+        raw_wireframe.push((Vec3::from_array(points[a]), Vec3::from_array(points[b])));
     }
 
     let mean_edge_length = average_edge_length(&raw_wireframe);

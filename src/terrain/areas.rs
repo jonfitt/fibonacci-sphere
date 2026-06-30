@@ -135,13 +135,16 @@ mod tests {
         assert_eq!(classify_site(TerrainType::Land), AreaKind::Land);
         assert_eq!(classify_site(TerrainType::Mountain), AreaKind::Mountain);
         assert_eq!(classify_site(TerrainType::Ice), AreaKind::Ice);
-        assert_eq!(classify_site(TerrainType::IceMountain), AreaKind::IceMountain);
+        assert_eq!(
+            classify_site(TerrainType::IceMountain),
+            AreaKind::IceMountain
+        );
     }
 
     #[test]
     fn voronoi_areas_cover_every_site() {
-        use crate::methods::DistributionMethod;
         use crate::SphereLattice;
+        use crate::methods::DistributionMethod;
 
         let lattice =
             SphereLattice::generate(DistributionMethod::CanonicalMidpoint, 80, 1.0).unwrap();
@@ -152,10 +155,12 @@ mod tests {
             &lattice.surface_graph(),
         );
         assert_eq!(area_map.areas.len(), lattice.len());
-        assert!(area_map
-            .areas
-            .iter()
-            .enumerate()
-            .all(|(index, area)| area.site_index == index));
+        assert!(
+            area_map
+                .areas
+                .iter()
+                .enumerate()
+                .all(|(index, area)| area.site_index == index)
+        );
     }
 }

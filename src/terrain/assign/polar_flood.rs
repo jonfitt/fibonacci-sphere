@@ -186,7 +186,8 @@ pub fn flood_polar_cap_membership(
             }
 
             let step = edge_weight
-                * (polar_ice_terrain_resistance(temperate[neighbor], params) + params.latitude_cost);
+                * (polar_ice_terrain_resistance(temperate[neighbor], params)
+                    + params.latitude_cost);
             let next_cost = cost + step;
             if next_cost + 1e-9 < best_cost[neighbor] && next_cost <= max_cost + 1e-9 {
                 best_cost[neighbor] = next_cost;
@@ -250,8 +251,8 @@ pub fn apply_polar_ice_flood(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::methods::DistributionMethod;
     use crate::SphereLattice;
+    use crate::methods::DistributionMethod;
 
     #[test]
     fn deep_water_costs_more_than_shallow_water() {
@@ -369,14 +370,8 @@ mod tests {
             temperate[index] = TerrainType::Mountain;
         }
 
-        let spidery = flood_polar_cap_membership(
-            &graph,
-            &positions,
-            &temperate,
-            false,
-            0.45,
-            params,
-        );
+        let spidery =
+            flood_polar_cap_membership(&graph, &positions, &temperate, false, 0.45, params);
         let circular = flood_polar_cap_membership(
             &graph,
             &positions,

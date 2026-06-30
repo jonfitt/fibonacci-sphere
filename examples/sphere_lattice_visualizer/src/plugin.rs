@@ -4,9 +4,13 @@ use bevy::prelude::*;
 
 use crate::camera::{orbit_camera, setup_camera};
 use crate::controls::keyboard_controls;
-use crate::gizmos::{draw_axes, draw_delaunay_wireframe, draw_polar_ice_circles, draw_voronoi_borders};
+use crate::gizmos::{
+    draw_axes, draw_delaunay_wireframe, draw_polar_ice_circles, draw_voronoi_borders,
+};
 use crate::hud::{setup_hud, update_hud};
-use crate::lattice::{apply_distance_fade, sync_lattice, DelaunayWireframe, VoronoiBorderWireframe};
+use crate::lattice::{
+    DelaunayWireframe, VoronoiBorderWireframe, apply_distance_fade, sync_lattice,
+};
 use crate::settings::{LatticeSyncState, VizSettings};
 
 /// Registers resources, startup systems, and update systems for the visualizer.

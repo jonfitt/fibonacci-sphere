@@ -5,7 +5,7 @@ use fibonacci_sphere::{outward_lift, polar_cap_circle_segments};
 
 use crate::camera::OrbitCamera;
 use crate::lattice::{DelaunayWireframe, VoronoiBorderWireframe};
-use crate::settings::{brightness_at_distance, fade_color, fade_color_with_floor, VizSettings};
+use crate::settings::{VizSettings, brightness_at_distance, fade_color, fade_color_with_floor};
 
 const WIREFRAME_COLOR: Color = Color::srgba(0.35, 0.75, 1.0, 0.85);
 const WIREFRAME_COLOR_SHADED: Color = Color::srgba(0.98, 0.98, 0.98, 1.0);
@@ -77,8 +77,7 @@ pub fn draw_polar_ice_circles(
     let shaded = settings.show_voronoi_cell_shading;
 
     let mut draw_circle = |south: bool, angular_distance: f32, base_color: Color| {
-        let angular_distance =
-            angular_distance.clamp(0.0, std::f32::consts::FRAC_PI_2);
+        let angular_distance = angular_distance.clamp(0.0, std::f32::consts::FRAC_PI_2);
         if angular_distance <= f32::EPSILON {
             return;
         }

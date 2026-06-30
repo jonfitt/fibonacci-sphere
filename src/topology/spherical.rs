@@ -270,7 +270,10 @@ fn insert_edge(edges: &mut Vec<[usize; 2]>, a: usize, b: usize) {
         return;
     }
     let key = normalized_pair(a, b);
-    if edges.iter().all(|edge| normalized_pair(edge[0], edge[1]) != key) {
+    if edges
+        .iter()
+        .all(|edge| normalized_pair(edge[0], edge[1]) != key)
+    {
         edges.push([key.0, key.1]);
     }
 }
@@ -288,8 +291,8 @@ fn fallback_edges(n: usize) -> Vec<[usize; 2]> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::methods::DistributionMethod;
     use crate::SphereLattice;
+    use crate::methods::DistributionMethod;
 
     #[test]
     fn mesh_triangles_cover_edges() {
@@ -329,8 +332,7 @@ mod tests {
 
     #[test]
     fn average_degree_is_about_six_for_uniform_sampling() {
-        let lattice =
-            SphereLattice::generate(DistributionMethod::OffsetPacking, 200, 1.0).unwrap();
+        let lattice = SphereLattice::generate(DistributionMethod::OffsetPacking, 200, 1.0).unwrap();
         let positions: Vec<[f32; 3]> = lattice.points().iter().map(|p| p.position).collect();
         let edges = spherical_delaunay_edges(&positions);
         let edge_count = edges.len();
@@ -423,10 +425,7 @@ mod tests {
                 SphereLattice::generate(DistributionMethod::CanonicalMidpoint, count, 1.0).unwrap();
             let positions: Vec<[f32; 3]> = lattice.points().iter().map(|p| p.position).collect();
             let edges = spherical_delaunay_edges(&positions);
-            assert!(
-                !edges.is_empty(),
-                "count {count}: no edges produced"
-            );
+            assert!(!edges.is_empty(), "count {count}: no edges produced");
 
             let mut incident = vec![0usize; positions.len()];
             for [a, b] in &edges {

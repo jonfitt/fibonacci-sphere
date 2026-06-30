@@ -64,7 +64,8 @@ pub fn mesh_boundary_ring(
     boundary
         .iter()
         .filter(|point| {
-            !(strip_pole && coincident_on_sphere(scale(normalize(**point), surface_radius), fan_apex))
+            !(strip_pole
+                && coincident_on_sphere(scale(normalize(**point), surface_radius), fan_apex))
         })
         .map(|point| scale(normalize(*point), surface_radius))
         .collect()
@@ -161,7 +162,10 @@ pub fn build_voronoi_cell_fan_mesh(
     if triangles.is_empty() {
         None
     } else {
-        Some(VoronoiFanMesh { vertices, triangles })
+        Some(VoronoiFanMesh {
+            vertices,
+            triangles,
+        })
     }
 }
 
@@ -214,8 +218,9 @@ mod tests {
             [-1.0, 0.0, 0.0],
             [0.0, 0.0, -1.0],
         ];
-        let mesh = build_voronoi_cell_fan_mesh(apex, &boundary, radius, VoronoiFanMeshOptions::default())
-            .expect("fan mesh");
+        let mesh =
+            build_voronoi_cell_fan_mesh(apex, &boundary, radius, VoronoiFanMeshOptions::default())
+                .expect("fan mesh");
         assert!(!mesh.vertices.is_empty());
         assert_eq!(mesh.triangles.len(), 4);
     }

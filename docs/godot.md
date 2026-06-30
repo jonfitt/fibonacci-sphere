@@ -1,8 +1,10 @@
 # Godot Integration
 
-The `fibonacci_sphere` library ships as a Godot 4 GDExtension. Coordinates are **Y-up, right-handed** and match Godot 4's default 3D frame without conversion.
+The `fibonacci_sphere` library ships as a Godot 4 GDExtension. Coordinates are **Y-up, right-handed**
+and match Godot 4's default 3D frame without conversion.
 
-The extension depends on the core library. Spherical Delaunay wireframe, Voronoi terrain polygons, and pathfinding are all part of the default build.
+The extension depends on the core library. Spherical Delaunay wireframe, Voronoi terrain polygons,
+and pathfinding are all part of the default build.
 
 ## Build the extension
 
@@ -22,9 +24,8 @@ The shared library is written to `target/debug/` (or `target/release/`):
 | Linux    | `target/debug/libfibonacci_sphere_gd.so` |
 | macOS    | `target/debug/libfibonacci_sphere_gd.dylib` |
 
-### WSL (Windows toolchain)
-
-If WSL `cargo` fails with `linker cc not found`, use Windows `cargo.exe` and a `C:\...` manifest path. See [`.cursor/skills/windows-rust-godot-build/SKILL.md`](../.cursor/skills/windows-rust-godot-build/SKILL.md).
+Use [`scripts/linux/`](../scripts/linux/) on Linux/WSL or [`scripts/windows/`](../scripts/windows/) on
+Windows so `cargo` matches the platform where you run Godot (`.so` on Linux, `.dll` on Windows).
 
 ## Open the demo project
 
@@ -57,7 +58,10 @@ Core lattice controls (same as Bevy visualizer):
 | Drag (LMB) | Orbit camera |
 | Scroll | Zoom camera |
 
-The HUD lists method descriptions, parameters, and terrain-type checkboxes for filtered routing. Terrain polygons and coastline use ribbon quads lifted slightly above the sphere surface. Lattice points render via a **`MultiMeshInstance3D`** (one draw call, not thousands of scene nodes). RGB axis lines mark +X (red), +Y (green), and +Z (blue).
+The HUD lists method descriptions, parameters, and terrain-type checkboxes for filtered routing.
+Terrain polygons and coastline use ribbon quads lifted slightly above the sphere surface. Lattice
+points render via a **`MultiMeshInstance3D`** (one draw call, not thousands of scene nodes). RGB axis
+lines mark +X (red), +Y (green), and +Z (blue).
 
 On first open, Godot creates `godot/.godot/extension_list.cfg` automatically.
 
@@ -148,7 +152,8 @@ var positions := FibonacciSphere.generate_positions(2, 64, 1.5)
 | `classify_border_between_terrain_types(left, right)` | `int` | `FibonacciAreaBorderKind` index |
 | `is_coastline_between_terrain_types(left, right)` | `bool` | Sea-level crossing between types |
 
-`FibonacciTerrainArea` methods: `get_site_index()`, `get_terrain_type()`, `get_boundary()`, `get_boundary_neighbors()`, `get_edge_border_kinds()`, `is_coastline_edge(edge_index)`.
+`FibonacciTerrainArea` methods: `get_site_index()`, `get_terrain_type()`, `get_boundary()`,
+`get_boundary_neighbors()`, `get_edge_border_kinds()`, `is_coastline_edge(edge_index)`.
 
 For full-sphere terrain rendering, prefer **`get_terrain_mesh_data()`** over per-cell `build_voronoi_cell_fan_mesh()` loops.
 
@@ -160,11 +165,18 @@ For full-sphere terrain rendering, prefer **`get_terrain_mesh_data()`** over per
 | `populate_point_multimesh(multimesh, lift, default_color)` | `bool` | Fill a `MultiMesh` with lifted lattice points |
 | `update_point_multimesh_highlights(multimesh, from, to, default, selected)` | `bool` | Set route highlight colors on a populated `MultiMesh` |
 
-Wireframe, coastline, and route overlays in the demo call **`FibonacciSphere.build_ribbon_line_mesh()`** (static) so ribbon expansion runs in Rust, not GDScript.
+Wireframe, coastline, and route overlays in the demo call **`FibonacciSphere.build_ribbon_line_mesh()`**
+(static) so ribbon expansion runs in Rust, not GDScript.
 
 Terrain type indices match `FibonacciTerrainType`: Land=0, Water=1, DeepWater=2, Mountain=3, Ice=4, IceMountain=5.
 
-**Polar ice caps:** `north_polar_ice_distance` and `south_polar_ice_distance` set the maximum angular reach (radians). Ice is grown by least-cost flood fill from each pole across the Delaunay mesh. Resistance parameters (`polar_ice_mountain_resistance`, `polar_ice_land_resistance`, `polar_ice_water_resistance`, `polar_ice_deep_water_resistance`) control how easily ice crosses each temperate terrain type; lower mountain resistance yields spidery caps along high ground. `polar_ice_latitude_cost` adds uniform cost per geodesic edge and pushes caps toward rounder boundaries when increased.
+**Polar ice caps:** `north_polar_ice_distance` and `south_polar_ice_distance` set the maximum angular
+reach (radians). Ice is grown by least-cost flood fill from each pole across the Delaunay mesh.
+Resistance parameters (`polar_ice_mountain_resistance`, `polar_ice_land_resistance`,
+`polar_ice_water_resistance`, `polar_ice_deep_water_resistance`) control how easily ice crosses each
+temperate terrain type; lower mountain resistance yields spidery caps along high ground.
+`polar_ice_latitude_cost` adds uniform cost per geodesic edge and pushes caps toward rounder boundaries
+when increased.
 
 ### Geography
 
@@ -191,9 +203,11 @@ Invalid arguments log a Godot error and return empty arrays or sentinel values (
 
 ## Surface pathfinding
 
-Paths follow the **spherical Delaunay wireframe** — the same edge set as `get_wireframe_segments()`. Edge weights are **geodesic arc length** on the sphere.
+Paths follow the **spherical Delaunay wireframe** — the same edge set as `get_wireframe_segments()`.
+Edge weights are **geodesic arc length** on the sphere.
 
-Terrain-filtered variants require `generate_terrain()` first. Pass an empty `PackedInt32Array` for `allowed_terrain_types` to allow every type.
+Terrain-filtered variants require `generate_terrain()` first. Pass an empty `PackedInt32Array` for
+`allowed_terrain_types` to allow every type.
 
 ### Typical workflow
 
@@ -225,9 +239,12 @@ var length: float = gen.shortest_surface_path_length(start, goal)
 
 `FibonacciSphere` builds the surface graph inside `generate()` and reuses it for every `shortest_surface_path_*` call.
 
-After terrain generation, the extension also caches **terrain polygons**, a **combined terrain mesh**, and **coastline segments** until the lattice or terrain changes (`generate`, `generate_terrain`, or `clear()`). This avoids rebuilding Voronoi data on every visual update.
+After terrain generation, the extension also caches **terrain polygons**, a **combined terrain mesh**,
+and **coastline segments** until the lattice or terrain changes (`generate`, `generate_terrain`, or
+`clear()`). This avoids rebuilding Voronoi data on every visual update.
 
-In Rust, prefer `lattice.surface_graph()` and [`render`](../src/render/mod.rs) batch builders over per-cell FFI loops — see [`docs/architecture.md`](architecture.md).
+In Rust, prefer `lattice.surface_graph()` and [`render`](../src/render/mod.rs) batch builders over
+per-cell FFI loops — see [`docs/architecture.md`](architecture.md).
 
 ### Errors
 
@@ -240,7 +257,8 @@ In Rust, prefer `lattice.surface_graph()` and [`render`](../src/render/mod.rs) b
 
 ## Coastline and borders
 
-`AreaBorderKind::Coastline` marks edges where one side is above sea level (land or mountain) and the other is below (water or deep water).
+`AreaBorderKind::Coastline` marks edges where one side is above sea level (land or mountain) and the
+other is below (water or deep water).
 
 - **`get_coastline_segments()`** — deduplicated segment pairs ready for `build_ribbon_line_mesh()`.
 - Per-polygon: `is_coastline_edge` on `FibonacciTerrainArea`, or filter `edge_border_kinds`.
@@ -280,4 +298,5 @@ Press **M** to cycle methods. The Bevy app and Godot demo share the same hotkeys
 
 ## Flat buffer (Rust-only)
 
-[`SphereLattice::positions_flat()`](../src/lattice.rs) returns `[x0, y0, z0, x1, y1, z1, ...]` as `Vec<f32>`. The GDExtension converts that layout to `PackedVector3Array` for Godot.
+[`SphereLattice::positions_flat()`](../src/lattice.rs) returns `[x0, y0, z0, x1, y1, z1, ...]` as
+`Vec<f32>`. The GDExtension converts that layout to `PackedVector3Array` for Godot.

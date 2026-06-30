@@ -92,8 +92,16 @@ pub fn update_hud(settings: Res<VizSettings>, mut query: Query<&mut Text, With<H
         settings.point_count,
         settings.radius,
         if settings.show_wireframe { "on" } else { "off" },
-        if settings.show_voronoi_borders { "on" } else { "off" },
-        if settings.show_voronoi_cell_shading { "on" } else { "off" },
+        if settings.show_voronoi_borders {
+            "on"
+        } else {
+            "off"
+        },
+        if settings.show_voronoi_cell_shading {
+            "on"
+        } else {
+            "off"
+        },
         settings.terrain_seed,
         perlin_controls,
     );

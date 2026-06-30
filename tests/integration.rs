@@ -3,9 +3,9 @@ use std::f64::consts::PI;
 mod common;
 
 use common::{assert_on_sphere, assert_unique_positions, position_distance};
+use fibonacci_sphere::SphereLattice;
 use fibonacci_sphere::methods::DistributionMethod;
 use fibonacci_sphere::point::GOLDEN_RATIO;
-use fibonacci_sphere::SphereLattice;
 
 #[test]
 fn canonical_midpoint_golden_values() {
