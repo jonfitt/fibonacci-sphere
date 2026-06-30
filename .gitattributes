@@ -1,0 +1,23 @@
+# Line endings: CRLF everywhere in the working tree and in git, on all platforms.
+# Git applies these rules on checkout and commit; set `core.autocrlf=false` locally.
+
+* text=auto eol=crlf
+
+# POSIX shell entry points must stay LF so they execute on Linux/WSL (shebang line).
+.githooks/pre-commit text eol=lf
+scripts/linux/** text eol=lf
+
+# Binary assets — never line-ending conversion
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.dll binary
+*.so binary
+*.dylib binary
+*.rlib binary
+*.exe binary
+*.wasm binary
+*.pdf binary

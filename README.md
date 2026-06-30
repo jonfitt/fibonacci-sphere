@@ -173,6 +173,16 @@ cargo test --workspace
 
 Integration tests: [`tests/integration.rs`](./tests/integration.rs).
 
+## Line endings
+
+All text files use **CRLF** on every platform. See [`.gitattributes`](./.gitattributes) and
+[`.editorconfig`](./.editorconfig). After cloning:
+
+```bash
+git config core.autocrlf false
+git add --renormalize .
+```
+
 ## CI and git hooks
 
 GitHub Actions (`.github/workflows/rust.yml`) runs on every push to `main` and every pull request
