@@ -89,39 +89,33 @@ pub fn keyboard_controls(keys: Res<ButtonInput<KeyCode>>, mut settings: ResMut<V
         return;
     }
     if keys.just_pressed(KeyCode::Digit5) {
-        settings.polar_ice_mountain_resistance = (settings.polar_ice_mountain_resistance
-            - POLAR_ICE_RESISTANCE_STEP)
-            .clamp(0.05, 3.0);
+        settings.polar_ice_mountain_resistance =
+            (settings.polar_ice_mountain_resistance - POLAR_ICE_RESISTANCE_STEP).clamp(0.05, 3.0);
         return;
     }
     if keys.just_pressed(KeyCode::Digit6) {
-        settings.polar_ice_mountain_resistance = (settings.polar_ice_mountain_resistance
-            + POLAR_ICE_RESISTANCE_STEP)
-            .clamp(0.05, 3.0);
+        settings.polar_ice_mountain_resistance =
+            (settings.polar_ice_mountain_resistance + POLAR_ICE_RESISTANCE_STEP).clamp(0.05, 3.0);
         return;
     }
     if keys.just_pressed(KeyCode::Digit7) {
-        settings.polar_ice_water_resistance = (settings.polar_ice_water_resistance
-            - POLAR_ICE_RESISTANCE_STEP)
-            .clamp(0.5, 12.0);
+        settings.polar_ice_water_resistance =
+            (settings.polar_ice_water_resistance - POLAR_ICE_RESISTANCE_STEP).clamp(0.5, 12.0);
         return;
     }
     if keys.just_pressed(KeyCode::Digit8) {
-        settings.polar_ice_water_resistance = (settings.polar_ice_water_resistance
-            + POLAR_ICE_RESISTANCE_STEP)
-            .clamp(0.5, 12.0);
+        settings.polar_ice_water_resistance =
+            (settings.polar_ice_water_resistance + POLAR_ICE_RESISTANCE_STEP).clamp(0.5, 12.0);
         return;
     }
     if keys.just_pressed(KeyCode::KeyZ) {
-        settings.polar_ice_latitude_cost = (settings.polar_ice_latitude_cost
-            - POLAR_ICE_LATITUDE_STEP)
-            .clamp(0.0, 12.0);
+        settings.polar_ice_latitude_cost =
+            (settings.polar_ice_latitude_cost - POLAR_ICE_LATITUDE_STEP).clamp(0.0, 12.0);
         return;
     }
     if keys.just_pressed(KeyCode::KeyX) {
-        settings.polar_ice_latitude_cost = (settings.polar_ice_latitude_cost
-            + POLAR_ICE_LATITUDE_STEP)
-            .clamp(0.0, 12.0);
+        settings.polar_ice_latitude_cost =
+            (settings.polar_ice_latitude_cost + POLAR_ICE_LATITUDE_STEP).clamp(0.0, 12.0);
         return;
     }
 

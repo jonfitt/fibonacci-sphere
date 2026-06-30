@@ -18,7 +18,10 @@ pub fn assert_on_sphere(points: &[SpherePoint], radius: f64) {
 /// Assert indices run from 0 to len - 1 without gaps.
 pub fn assert_sequential_indices(points: &[SpherePoint]) {
     for (expected, p) in points.iter().enumerate() {
-        assert_eq!(p.index, expected, "non-sequential index at position {expected}");
+        assert_eq!(
+            p.index, expected,
+            "non-sequential index at position {expected}"
+        );
     }
 }
 
@@ -27,8 +30,7 @@ pub fn assert_unique_positions(points: &[SpherePoint]) {
     for i in 0..points.len() {
         for j in (i + 1)..points.len() {
             assert_ne!(
-                points[i].position,
-                points[j].position,
+                points[i].position, points[j].position,
                 "duplicate positions at indices {i} and {j}"
             );
         }

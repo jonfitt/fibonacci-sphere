@@ -1,0 +1,14 @@
+#!/bin/sh
+# Routes pre-commit to the platform CI script (Linux/WSL vs Windows).
+set -eu
+
+ROOT="$(git rev-parse --show-toplevel)"
+
+case "$(uname -s 2>/dev/null || echo unknown)" in
+MINGW* | MSYS* | CYGWIN* | Windows_NT*)
+	exec powershell.exe -NoProfile -ExecutionPolicy Bypass -File "${ROOT}/scripts/windows/ci-check.ps1"
+	;;
+*)
+	exec "${ROOT}/scripts/linux/ci-check.sh"
+	;;
+esac

@@ -99,12 +99,13 @@ fn euclidean_distance(a: [f32; 3], b: [f32; 3]) -> f64 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::methods::DistributionMethod;
     use crate::SphereLattice;
+    use crate::methods::DistributionMethod;
 
     #[test]
     fn closest_neighbors_excludes_self_and_respects_k() {
-        let lattice = SphereLattice::generate(DistributionMethod::CanonicalMidpoint, 10, 1.0).unwrap();
+        let lattice =
+            SphereLattice::generate(DistributionMethod::CanonicalMidpoint, 10, 1.0).unwrap();
         let neighbors = lattice.closest_neighbors(0, 3);
         assert_eq!(neighbors.len(), 3);
         assert!(neighbors.iter().all(|neighbor| neighbor.index != 0));
@@ -115,14 +116,16 @@ mod tests {
 
     #[test]
     fn closest_neighbors_out_of_range_returns_empty() {
-        let lattice = SphereLattice::generate(DistributionMethod::CanonicalMidpoint, 5, 1.0).unwrap();
+        let lattice =
+            SphereLattice::generate(DistributionMethod::CanonicalMidpoint, 5, 1.0).unwrap();
         assert!(lattice.closest_neighbors(99, 3).is_empty());
         assert!(lattice.closest_neighbors(0, 0).is_empty());
     }
 
     #[test]
     fn bin_distances_groups_by_tolerance() {
-        let lattice = SphereLattice::generate(DistributionMethod::CanonicalMidpoint, 20, 1.0).unwrap();
+        let lattice =
+            SphereLattice::generate(DistributionMethod::CanonicalMidpoint, 20, 1.0).unwrap();
         let bins = lattice.bin_distances(0, 0.05);
         assert!(!bins.is_empty());
         for bin in &bins {

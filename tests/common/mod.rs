@@ -18,8 +18,7 @@ pub fn assert_unique_positions(points: &[SpherePoint]) {
     for i in 0..points.len() {
         for j in (i + 1)..points.len() {
             assert_ne!(
-                points[i].position,
-                points[j].position,
+                points[i].position, points[j].position,
                 "duplicate positions at indices {i} and {j}"
             );
         }

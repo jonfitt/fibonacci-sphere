@@ -148,16 +148,12 @@ mod tests {
         ];
         let mut rng = StdRng::seed_from_u64(1);
 
-        let replacement =
-            reassigner.reassign(0, TerrainType::Mountain, &terrain, &graph, &mut rng);
+        let replacement = reassigner.reassign(0, TerrainType::Mountain, &terrain, &graph, &mut rng);
 
         assert_ne!(replacement, TerrainType::Water);
         assert!(matches!(
             replacement,
-            TerrainType::Land
-                | TerrainType::Mountain
-                | TerrainType::Ice
-                | TerrainType::IceMountain
+            TerrainType::Land | TerrainType::Mountain | TerrainType::Ice | TerrainType::IceMountain
         ));
     }
 
@@ -170,15 +166,10 @@ mod tests {
             ElevationBand::BelowSeaLevel,
         ];
         let reassigner = BandPreservingReassigner::new(bands);
-        let terrain = [
-            TerrainType::Mountain,
-            TerrainType::Land,
-            TerrainType::Water,
-        ];
+        let terrain = [TerrainType::Mountain, TerrainType::Land, TerrainType::Water];
         let mut rng = StdRng::seed_from_u64(3);
 
-        let replacement =
-            reassigner.reassign(0, TerrainType::Mountain, &terrain, &graph, &mut rng);
+        let replacement = reassigner.reassign(0, TerrainType::Mountain, &terrain, &graph, &mut rng);
 
         assert_eq!(replacement, TerrainType::Land);
     }

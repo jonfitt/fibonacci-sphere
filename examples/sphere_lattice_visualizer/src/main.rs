@@ -26,5 +26,8 @@ use bevy::prelude::*;
 use plugin::VizPlugin;
 
 fn main() {
-    App::new().add_plugins(DefaultPlugins).add_plugins(VizPlugin).run();
+    App::new()
+        .add_plugins(DefaultPlugins)
+        .add_plugins(VizPlugin)
+        .run();
 }

@@ -1,9 +1,9 @@
 //! Voronoi terrain area polygons for meshing and texturing.
 
-use crate::topology::{spherical_voronoi_cells, SphericalMesh, VoronoiCell};
+use crate::topology::{SphericalMesh, VoronoiCell, spherical_voronoi_cells};
 
 use super::areas::TerrainAreaMap;
-use super::borders::{classify_area_border, AreaBorderKind};
+use super::borders::{AreaBorderKind, classify_area_border};
 use super::types::{TerrainMap, TerrainType};
 
 /// One terrain area as a spherical polygon suitable for Godot meshing.
@@ -75,7 +75,8 @@ fn infer_radius(positions: &[[f32; 3]]) -> f32 {
     positions
         .first()
         .map(|position| {
-            (position[0] * position[0] + position[1] * position[1] + position[2] * position[2]).sqrt()
+            (position[0] * position[0] + position[1] * position[1] + position[2] * position[2])
+                .sqrt()
         })
         .unwrap_or(1.0)
 }
@@ -92,9 +93,9 @@ fn scale_point(point: [f32; 3], radius: f32) -> [f32; 3] {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::SphereLattice;
     use crate::methods::DistributionMethod;
     use crate::terrain::PerlinNoiseConfig;
-    use crate::SphereLattice;
     use rand::SeedableRng;
     use rand::rngs::StdRng;
 
@@ -111,16 +112,14 @@ mod tests {
         );
         let mesh = lattice.spherical_mesh();
         let graph = lattice.surface_graph();
-        let polygons = build_terrain_area_polygons(
-            &lattice.position_arrays(),
-            &mesh,
-            &terrain,
-            &graph,
-        );
+        let polygons =
+            build_terrain_area_polygons(&lattice.position_arrays(), &mesh, &terrain, &graph);
         assert!(!polygons.is_empty());
         assert!(polygons.iter().all(|polygon| polygon.boundary.len() >= 3));
-        assert!(polygons
-            .iter()
-            .all(|polygon| polygon.edge_border_kinds.len() == polygon.boundary.len()));
+        assert!(
+            polygons
+                .iter()
+                .all(|polygon| polygon.edge_border_kinds.len() == polygon.boundary.len())
+        );
     }
 }

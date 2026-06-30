@@ -41,10 +41,10 @@ impl TerrainGenerator {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::SphereLattice;
     use crate::methods::DistributionMethod;
     use crate::terrain::assign::PerlinNoiseAssigner;
     use crate::terrain::types::TerrainType;
-    use crate::SphereLattice;
     use rand::SeedableRng;
     use rand::rngs::StdRng;
 
@@ -53,9 +53,11 @@ mod tests {
             &lattice.position_arrays(),
             PerlinNoiseConfig {
                 seed: Some(seed as u32),
-                north_polar_ice_distance: 0.4,
-                south_polar_ice_distance: 0.4,
-                mountain_threshold: 0.3,
+                spacing_factor: 1.2,
+                north_polar_ice_distance: 0.55,
+                south_polar_ice_distance: 0.55,
+                mountain_threshold: 0.15,
+                polar_ice_latitude_cost: 0.5,
                 ..Default::default()
             },
         )
@@ -64,7 +66,7 @@ mod tests {
     #[test]
     fn perlin_generator_includes_all_terrain_types_for_visualizer_seed() {
         let lattice =
-            SphereLattice::generate(DistributionMethod::CanonicalMidpoint, 100, 1.0).unwrap();
+            SphereLattice::generate(DistributionMethod::CanonicalMidpoint, 200, 1.0).unwrap();
         let graph = lattice.surface_graph();
         let mut rng = StdRng::seed_from_u64(1);
         let terrain = perlin_generator(&lattice, 1).generate(&graph, &mut rng);
@@ -95,8 +97,8 @@ mod tests {
             let (assigned, _) = assigner.assign_with_elevation_bands(&graph, &mut rng);
 
             let mut rng = StdRng::seed_from_u64(seed);
-            let generated = TerrainGenerator::perlin_noise(&positions, config)
-                .generate(&graph, &mut rng);
+            let generated =
+                TerrainGenerator::perlin_noise(&positions, config).generate(&graph, &mut rng);
 
             assert_eq!(
                 assigned,

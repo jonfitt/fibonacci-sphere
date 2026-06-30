@@ -1,6 +1,7 @@
 # fibonacci_sphere
 
-Rust library for generating evenly distributed sample points on a sphere, with surface topology (Delaunay wireframe, Voronoi cells, pathfinding), Perlin terrain, and Godot 4 integration.
+Rust library for generating evenly distributed sample points on a sphere, with surface topology
+(Delaunay wireframe, Voronoi cells, pathfinding), Perlin terrain, and Godot 4 integration.
 
 Coordinates are **Y-up, right-handed**, matching Godot 4's default 3D frame.
 
@@ -46,7 +47,8 @@ let areas = lattice.terrain_area_polygons(&terrain);
 let mesh = lattice.combined_terrain_mesh(&terrain, Default::default());
 ```
 
-[`SphereLattice`](./src/lattice.rs) is the main handle: generated [`SpherePoint`](./src/point.rs)s, method, radius, wireframe, routing graph, terrain, and geography queries.
+[`SphereLattice`](./src/lattice.rs) is the main handle: generated [`SpherePoint`](./src/point.rs)s,
+method, radius, wireframe, routing graph, terrain, and geography queries.
 
 ### Modules
 
@@ -78,7 +80,8 @@ Each method exposes [`MethodInfo`](./src/methods/info.rs) via `method.info()` or
 
 ### Surface topology and pathfinding
 
-Wireframe edges come from **spherical Delaunay triangulation** (stereographic projection + planar Delaunay). The same graph powers routing and Voronoi terrain areas.
+Wireframe edges come from **spherical Delaunay triangulation** (stereographic projection + planar
+Delaunay). The same graph powers routing and Voronoi terrain areas.
 
 ```rust
 let edges = lattice.wireframe_edges();
@@ -98,7 +101,13 @@ let path = graph.shortest_path_with_allowed_terrain(
 
 [`TerrainType`](./src/terrain/types.rs): `Land`, `Water`, `DeepWater`, `Mountain`, `Ice`, `IceMountain`.
 
-[`PerlinNoiseConfig`](./src/terrain/assign/perlin.rs) drives elevation bands and optional polar ice caps grown by flood fill from each pole (`north_polar_ice_distance`, `south_polar_ice_distance` in radians, plus resistance and `polar_ice_latitude_cost`). Within a flooded cap, temperate terrain becomes `Ice` / `IceMountain`. Voronoi cells become [`TerrainAreaPolygon`](./src/terrain/polygons.rs) with [`AreaBorderKind`](./src/terrain/borders.rs) per edge (`Coastline` = sea-level crossing). For rendering, [`render`](./src/render/) provides [`build_combined_terrain_mesh`](./src/render/terrain_mesh.rs), [`coastline_segment_positions`](./src/render/terrain_mesh.rs), and [`build_line_ribbon_mesh`](./src/render/ribbon.rs).
+[`PerlinNoiseConfig`](./src/terrain/assign/perlin.rs) drives elevation bands and optional polar ice
+caps grown by flood fill from each pole (`north_polar_ice_distance`, `south_polar_ice_distance` in
+radians, plus resistance and `polar_ice_latitude_cost`). Within a flooded cap, temperate terrain
+becomes `Ice` / `IceMountain`. Voronoi cells become [`TerrainAreaPolygon`](./src/terrain/polygons.rs)
+with [`AreaBorderKind`](./src/terrain/borders.rs) per edge (`Coastline` = sea-level crossing). For
+rendering, [`render`](./src/render/) provides [`build_combined_terrain_mesh`](./src/render/terrain_mesh.rs),
+[`coastline_segment_positions`](./src/render/terrain_mesh.rs), and [`build_line_ribbon_mesh`](./src/render/ribbon.rs).
 
 ### Features
 
@@ -115,7 +124,8 @@ cargo build -p fibonacci_sphere --no-default-features
 
 ## Bevy visualizer
 
-Interactive comparison of distribution methods with Delaunay wireframe, Voronoi terrain fill (combined meshes by terrain type), coastline borders, and Perlin controls.
+Interactive comparison of distribution methods with Delaunay wireframe, Voronoi terrain fill
+(combined meshes by terrain type), coastline borders, and Perlin controls.
 
 ```bash
 cargo run -p sphere_lattice_visualizer --release
@@ -149,9 +159,10 @@ cargo build -p fibonacci_sphere_gd --release
 
 Open [`godot/project.godot`](./godot/project.godot) in Godot 4.1+, then run [`godot/demo/main.tscn`](./godot/demo/main.tscn).
 
-The demo adds terrain polygons, coastline ribbons, click-to-route with terrain-type checkboxes, and Perlin hotkeys. Regeneration uses batch Rust APIs (`generate_with_terrain`, `get_terrain_mesh_data`, `MultiMesh` points). Method cycling uses **M** (same as Bevy). See [`docs/godot.md`](./docs/godot.md) for the full API.
-
-**WSL:** If `cargo` fails with `linker cc not found`, build with Windows `cargo.exe` — see [`.cursor/skills/windows-rust-godot-build/SKILL.md`](./.cursor/skills/windows-rust-godot-build/SKILL.md).
+The demo adds terrain polygons, coastline ribbons, click-to-route with terrain-type checkboxes, and
+Perlin hotkeys. Regeneration uses batch Rust APIs (`generate_with_terrain`, `get_terrain_mesh_data`,
+`MultiMesh` points). Method cycling uses **M** (same as Bevy). See [`docs/godot.md`](./docs/godot.md)
+for the full API.
 
 ## Tests
 
@@ -162,6 +173,29 @@ cargo test --workspace
 
 Integration tests: [`tests/integration.rs`](./tests/integration.rs).
 
+## CI and git hooks
+
+GitHub Actions (`.github/workflows/rust.yml`) runs on every push to `main` and every pull request
+targeting `main`: format check, Clippy, build, and test. The required check name is **`Rust / build`**.
+
+Local scripts are split by platform — see [`scripts/README.md`](./scripts/README.md). Use the set
+that matches where your **files** and **`cargo`** live:
+
+| Environment | CI check | Git hooks | Branch protection |
+|-------------|----------|-----------|-------------------|
+| Linux / WSL with Linux `cargo` | `./scripts/linux/ci-check.sh` | `./scripts/linux/setup-git-hooks.sh` | `./scripts/linux/setup-branch-protection.sh` |
+| Windows with Windows `cargo` | `scripts\windows\ci-check.cmd` | `scripts\windows\setup-git-hooks.cmd` | `scripts\windows\setup-branch-protection.cmd` |
+
+Branch protection (once, after `gh auth login`):
+
+```bash
+./scripts/linux/setup-branch-protection.sh
+```
+
+```cmd
+scripts\windows\setup-branch-protection.cmd
+```
+
 ## License
 
-MIT OR Apache-2.0
+See [LICENSE.md](./LICENSE.md).

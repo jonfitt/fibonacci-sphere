@@ -19,26 +19,17 @@ pub fn angular_distance_to_equator(position: [f32; 3]) -> f64 {
 }
 
 /// Vertex indices whose angular distance to the north pole is at most `max_angle`.
-pub fn vertices_within_north_polar_distance(
-    positions: &[[f32; 3]],
-    max_angle: f64,
-) -> Vec<usize> {
+pub fn vertices_within_north_polar_distance(positions: &[[f32; 3]], max_angle: f64) -> Vec<usize> {
     filter_by_angular_distance(positions, max_angle, angular_distance_to_north_pole)
 }
 
 /// Vertex indices whose angular distance to the south pole is at most `max_angle`.
-pub fn vertices_within_south_polar_distance(
-    positions: &[[f32; 3]],
-    max_angle: f64,
-) -> Vec<usize> {
+pub fn vertices_within_south_polar_distance(positions: &[[f32; 3]], max_angle: f64) -> Vec<usize> {
     filter_by_angular_distance(positions, max_angle, angular_distance_to_south_pole)
 }
 
 /// Vertex indices whose angular distance to the equator is at most `max_angle`.
-pub fn vertices_within_equatorial_distance(
-    positions: &[[f32; 3]],
-    max_angle: f64,
-) -> Vec<usize> {
+pub fn vertices_within_equatorial_distance(positions: &[[f32; 3]], max_angle: f64) -> Vec<usize> {
     filter_by_angular_distance(positions, max_angle, angular_distance_to_equator)
 }
 
@@ -117,7 +108,10 @@ mod tests {
     #[test]
     fn north_pole_has_zero_distance_to_north() {
         assert!(angular_distance_to_north_pole([0.0, 1.0, 0.0]).abs() < 1e-9);
-        assert!((angular_distance_to_north_pole([0.0, 0.0, 1.0]) - std::f64::consts::FRAC_PI_2).abs() < 1e-6);
+        assert!(
+            (angular_distance_to_north_pole([0.0, 0.0, 1.0]) - std::f64::consts::FRAC_PI_2).abs()
+                < 1e-6
+        );
     }
 
     #[test]
@@ -141,7 +135,9 @@ mod tests {
 
         for (start, end) in segments {
             for point in [start, end] {
-                let len = f64::from((point[0] * point[0] + point[1] * point[1] + point[2] * point[2]).sqrt());
+                let len = f64::from(
+                    (point[0] * point[0] + point[1] * point[1] + point[2] * point[2]).sqrt(),
+                );
                 assert!((len - f64::from(radius)).abs() < 1e-4);
                 assert!((angular_distance_to_north_pole(point) - distance).abs() < 1e-4);
             }

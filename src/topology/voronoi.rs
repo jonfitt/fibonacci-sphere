@@ -27,10 +27,7 @@ pub struct VoronoiCell {
 ///
 /// Cell boundaries connect circumcenters of Delaunay triangles in cyclic order
 /// around each site.
-pub fn spherical_voronoi_cells(
-    positions: &[[f32; 3]],
-    mesh: &SphericalMesh,
-) -> Vec<VoronoiCell> {
+pub fn spherical_voronoi_cells(positions: &[[f32; 3]], mesh: &SphericalMesh) -> Vec<VoronoiCell> {
     let circumcenters = triangle_circumcenters(positions, mesh);
     let edge_to_faces = triangle_edge_to_faces(mesh);
     let vertex_count = positions.len();
@@ -121,10 +118,7 @@ pub fn spherical_voronoi_border_segments(
         .collect()
 }
 
-fn triangle_circumcenters(
-    positions: &[[f32; 3]],
-    mesh: &SphericalMesh,
-) -> Vec<Option<[f32; 3]>> {
+fn triangle_circumcenters(positions: &[[f32; 3]], mesh: &SphericalMesh) -> Vec<Option<[f32; 3]>> {
     mesh.triangles
         .iter()
         .map(|&triangle| spherical_triangle_circumcenter(positions, triangle))
@@ -176,8 +170,7 @@ fn order_faces_around_vertex(
     for _ in 0..incident_faces.len() {
         ordered.push(current_face);
 
-        let Some((neighbor_a, neighbor_b)) =
-            neighbors_of_vertex_in_face(current_face, site, mesh)
+        let Some((neighbor_a, neighbor_b)) = neighbors_of_vertex_in_face(current_face, site, mesh)
         else {
             break;
         };
@@ -247,16 +240,19 @@ fn sort_faces_by_angle(
         .iter()
         .copied()
         .filter_map(|face_index| {
-            let circumcenter = spherical_triangle_circumcenter(positions, mesh.triangles[face_index])?;
+            let circumcenter =
+                spherical_triangle_circumcenter(positions, mesh.triangles[face_index])?;
             let angle = tangent_angle(circumcenter, axis_u, axis_v);
             Some((angle, face_index))
         })
         .collect();
     ranked.sort_by(|(left, _), (right, _)| {
-        left.partial_cmp(right)
-            .unwrap_or(std::cmp::Ordering::Equal)
+        left.partial_cmp(right).unwrap_or(std::cmp::Ordering::Equal)
     });
-    ranked.into_iter().map(|(_, face_index)| face_index).collect()
+    ranked
+        .into_iter()
+        .map(|(_, face_index)| face_index)
+        .collect()
 }
 
 fn polar_extreme_index(positions: &[[f32; 3]], south: bool) -> usize {
@@ -469,11 +465,7 @@ fn spherical_triangle_circumcenter_unit_f64(
     let ac = dot_f64(pa, pc);
     let bc = dot_f64(pb, pc);
 
-    let matrix = [
-        [1.0, ab, ac],
-        [ab, 1.0, bc],
-        [ac, bc, 1.0],
-    ];
+    let matrix = [[1.0, ab, ac], [ab, 1.0, bc], [ac, bc, 1.0]];
     let rhs = [1.0, 1.0, 1.0];
     let [alpha, beta, gamma] = solve_symmetric_3x3(matrix, rhs)?;
 
@@ -600,8 +592,8 @@ fn scale(v: [f32; 3], factor: f32) -> [f32; 3] {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::methods::DistributionMethod;
     use crate::SphereLattice;
+    use crate::methods::DistributionMethod;
 
     #[test]
     fn circumcenter_is_equidistant_from_triangle_vertices() {
@@ -697,12 +689,8 @@ mod tests {
     #[test]
     fn offset_average_neighbor_south_pole_cell_winding_is_outward() {
         let count = 6000;
-        let lattice = SphereLattice::generate(
-            DistributionMethod::OffsetAverageNeighbor,
-            count,
-            1.0,
-        )
-        .unwrap();
+        let lattice =
+            SphereLattice::generate(DistributionMethod::OffsetAverageNeighbor, count, 1.0).unwrap();
         let positions = lattice.position_arrays();
         let mesh = lattice.spherical_mesh();
         let cells = spherical_voronoi_cells(&positions, &mesh);
@@ -729,12 +717,8 @@ mod tests {
 
     #[test]
     fn all_cells_use_outward_fan_winding() {
-        let lattice = SphereLattice::generate(
-            DistributionMethod::OffsetAverageNeighbor,
-            320,
-            1.0,
-        )
-        .unwrap();
+        let lattice =
+            SphereLattice::generate(DistributionMethod::OffsetAverageNeighbor, 320, 1.0).unwrap();
         let positions = lattice.position_arrays();
         let mesh = lattice.spherical_mesh();
         let cells = spherical_voronoi_cells(&positions, &mesh);
@@ -755,12 +739,9 @@ mod tests {
     #[test]
     fn explicit_south_pole_hub_cell_is_valid() {
         let count = 6000;
-        let lattice = SphereLattice::generate(
-            DistributionMethod::OffsetPackingWithPoles,
-            count,
-            1.0,
-        )
-        .unwrap();
+        let lattice =
+            SphereLattice::generate(DistributionMethod::OffsetPackingWithPoles, count, 1.0)
+                .unwrap();
         let positions = lattice.position_arrays();
         let mesh = lattice.spherical_mesh();
         let cells = spherical_voronoi_cells(&positions, &mesh);
@@ -791,7 +772,10 @@ mod tests {
             boundary.len()
         );
 
-        assert!(incident > 6, "expected hub triangulation at explicit south pole");
+        assert!(
+            incident > 6,
+            "expected hub triangulation at explicit south pole"
+        );
         assert_eq!(boundary.len(), incident);
 
         let south_cap: Vec<usize> = positions
@@ -868,11 +852,7 @@ mod tests {
                 );
             }
             assert!(
-                spherical_voronoi_cell_contains_point(
-                    &positions,
-                    south_index,
-                    [0.0, -1.0, 0.0],
-                ),
+                spherical_voronoi_cell_contains_point(&positions, south_index, [0.0, -1.0, 0.0],),
                 "{method:?}: south pole must belong to the southernmost Voronoi cell"
             );
         }
@@ -880,12 +860,8 @@ mod tests {
 
     #[test]
     fn southernmost_cell_mesh_covers_south_pole_after_polar_close() {
-        let lattice = SphereLattice::generate(
-            DistributionMethod::OffsetAverageNeighbor,
-            6000,
-            1.0,
-        )
-        .unwrap();
+        let lattice =
+            SphereLattice::generate(DistributionMethod::OffsetAverageNeighbor, 6000, 1.0).unwrap();
         let positions = lattice.position_arrays();
         let mesh = lattice.spherical_mesh();
         let cells = spherical_voronoi_cells(&positions, &mesh);
@@ -911,12 +887,8 @@ mod tests {
 
     #[test]
     fn only_polar_extreme_sites_use_geographic_pole_apex() {
-        let lattice = SphereLattice::generate(
-            DistributionMethod::OffsetAverageNeighbor,
-            600,
-            1.0,
-        )
-        .unwrap();
+        let lattice =
+            SphereLattice::generate(DistributionMethod::OffsetAverageNeighbor, 600, 1.0).unwrap();
         let positions = lattice.position_arrays();
         let south_index = polar_extreme_index(&positions, true);
         let north_index = polar_extreme_index(&positions, false);
@@ -937,12 +909,8 @@ mod tests {
     #[test]
     fn southernmost_cell_needs_pole_fan_apex_without_explicit_pole() {
         let count = 6000;
-        let lattice = SphereLattice::generate(
-            DistributionMethod::OffsetAverageNeighbor,
-            count,
-            1.0,
-        )
-        .unwrap();
+        let lattice =
+            SphereLattice::generate(DistributionMethod::OffsetAverageNeighbor, count, 1.0).unwrap();
         let positions = lattice.position_arrays();
         let mesh = lattice.spherical_mesh();
         let cells = spherical_voronoi_cells(&positions, &mesh);
@@ -974,12 +942,8 @@ mod tests {
     #[test]
     fn no_euclidean_fan_mesh_covers_foreign_site() {
         let count = 6000;
-        let lattice = SphereLattice::generate(
-            DistributionMethod::OffsetAverageNeighbor,
-            count,
-            1.0,
-        )
-        .unwrap();
+        let lattice =
+            SphereLattice::generate(DistributionMethod::OffsetAverageNeighbor, count, 1.0).unwrap();
         let positions = lattice.position_arrays();
         let mesh = lattice.spherical_mesh();
         let cells = spherical_voronoi_cells(&positions, &mesh);
@@ -1044,7 +1008,11 @@ mod tests {
         })
     }
 
-    fn euclidean_fan_contains_point(site: [f32; 3], boundary: &[[f32; 3]], point: [f32; 3]) -> bool {
+    fn euclidean_fan_contains_point(
+        site: [f32; 3],
+        boundary: &[[f32; 3]],
+        point: [f32; 3],
+    ) -> bool {
         if boundary.len() < 3 {
             return false;
         }
@@ -1064,12 +1032,7 @@ mod tests {
         false
     }
 
-    fn point_in_euclidean_triangle(
-        point: [f32; 3],
-        a: [f32; 3],
-        b: [f32; 3],
-        c: [f32; 3],
-    ) -> bool {
+    fn point_in_euclidean_triangle(point: [f32; 3], a: [f32; 3], b: [f32; 3], c: [f32; 3]) -> bool {
         let v0 = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
         let v1 = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
         let v2 = [point[0] - a[0], point[1] - a[1], point[2] - a[2]];
@@ -1091,12 +1054,9 @@ mod tests {
     #[test]
     fn offset_average_neighbor_south_pole_has_complete_circumcenters() {
         for &count in &[100, 320, 6000] {
-            let lattice = SphereLattice::generate(
-                DistributionMethod::OffsetAverageNeighbor,
-                count,
-                1.0,
-            )
-            .unwrap();
+            let lattice =
+                SphereLattice::generate(DistributionMethod::OffsetAverageNeighbor, count, 1.0)
+                    .unwrap();
             let positions = lattice.position_arrays();
             let mesh = lattice.spherical_mesh();
             let cells = spherical_voronoi_cells(&positions, &mesh);
@@ -1121,13 +1081,12 @@ mod tests {
 
             let missing_circumcenters = incident
                 .iter()
-                .filter(|triangle| spherical_triangle_circumcenter(&positions, **triangle).is_none())
+                .filter(|triangle| {
+                    spherical_triangle_circumcenter(&positions, **triangle).is_none()
+                })
                 .count();
 
-            let small_cells = cells
-                .iter()
-                .filter(|cell| cell.boundary.len() < 3)
-                .count();
+            let small_cells = cells.iter().filter(|cell| cell.boundary.len() < 3).count();
 
             assert_eq!(
                 missing_circumcenters, 0,

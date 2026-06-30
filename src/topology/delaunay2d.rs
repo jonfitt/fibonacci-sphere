@@ -76,8 +76,12 @@ pub fn convex_hull(points: &[(f64, f64)]) -> Vec<usize> {
 
 fn bowyer_watson_triangulation(points: &[(f64, f64)]) -> Vec<[usize; 3]> {
     let n = points.len();
-    let (mut min_x, mut max_x, mut min_y, mut max_y) =
-        (f64::INFINITY, f64::NEG_INFINITY, f64::INFINITY, f64::NEG_INFINITY);
+    let (mut min_x, mut max_x, mut min_y, mut max_y) = (
+        f64::INFINITY,
+        f64::NEG_INFINITY,
+        f64::INFINITY,
+        f64::NEG_INFINITY,
+    );
     for &(x, y) in points {
         min_x = min_x.min(x);
         max_x = max_x.max(x);
@@ -183,12 +187,7 @@ fn brute_force_triangulation(points: &[(f64, f64)]) -> Vec<[usize; 3]> {
     triangles
 }
 
-fn point_in_circumcircle(
-    a: (f64, f64),
-    b: (f64, f64),
-    c: (f64, f64),
-    p: (f64, f64),
-) -> bool {
+fn point_in_circumcircle(a: (f64, f64), b: (f64, f64), c: (f64, f64), p: (f64, f64)) -> bool {
     if orient(a, b, c) > EPS {
         return in_circumcircle(a, b, c, p);
     }
@@ -210,8 +209,7 @@ fn in_circumcircle(a: (f64, f64), b: (f64, f64), c: (f64, f64), p: (f64, f64)) -
     let cx = c.0 - p.0;
     let cy = c.1 - p.1;
 
-    let det = (ax * ax + ay * ay) * (bx * cy - cx * by)
-        - (bx * bx + by * by) * (ax * cy - cx * ay)
+    let det = (ax * ax + ay * ay) * (bx * cy - cx * by) - (bx * bx + by * by) * (ax * cy - cx * ay)
         + (cx * cx + cy * cy) * (ax * by - bx * ay);
     det > EPS
 }

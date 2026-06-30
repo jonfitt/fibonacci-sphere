@@ -3,16 +3,16 @@
 use noise::{NoiseFn, Perlin};
 use rand::RngCore;
 
-use crate::topology::SurfaceGraph;
 use crate::SphereLattice;
+use crate::topology::SurfaceGraph;
 
-use super::polar_flood::{
-    apply_polar_ice_flood, PolarIceFloodParams, DEFAULT_POLAR_ICE_DEEP_WATER_RESISTANCE,
-    DEFAULT_POLAR_ICE_LAND_RESISTANCE, DEFAULT_POLAR_ICE_LATITUDE_COST,
-    DEFAULT_POLAR_ICE_MOUNTAIN_RESISTANCE, DEFAULT_POLAR_ICE_WATER_RESISTANCE,
-};
 use super::super::types::{ElevationBand, TerrainType};
 use super::TerrainAssigner;
+use super::polar_flood::{
+    DEFAULT_POLAR_ICE_DEEP_WATER_RESISTANCE, DEFAULT_POLAR_ICE_LAND_RESISTANCE,
+    DEFAULT_POLAR_ICE_LATITUDE_COST, DEFAULT_POLAR_ICE_MOUNTAIN_RESISTANCE,
+    DEFAULT_POLAR_ICE_WATER_RESISTANCE, PolarIceFloodParams, apply_polar_ice_flood,
+};
 
 /// Configuration for [`PerlinNoiseAssigner`].
 #[derive(Debug, Clone, Copy)]
@@ -166,10 +166,7 @@ impl PerlinNoiseAssigner {
             "PerlinNoiseAssigner positions must match graph vertex count"
         );
 
-        let seed = self
-            .config
-            .seed
-            .unwrap_or_else(|| rng.next_u32());
+        let seed = self.config.seed.unwrap_or_else(|| rng.next_u32());
         let perlin = Perlin::new(seed);
         let frequency = self.noise_frequency(graph);
 
@@ -301,10 +298,8 @@ mod tests {
 
     #[test]
     fn classifies_noise_bands() {
-        let assigner = PerlinNoiseAssigner::new(
-            vec![[1.0, 0.0, 0.0]],
-            PerlinNoiseConfig::default(),
-        );
+        let assigner =
+            PerlinNoiseAssigner::new(vec![[1.0, 0.0, 0.0]], PerlinNoiseConfig::default());
 
         assert_eq!(assigner.classify(-0.6, 0.5, -0.3), TerrainType::DeepWater);
         assert_eq!(assigner.classify(-0.1, 0.5, -0.3), TerrainType::Water);
@@ -445,13 +440,10 @@ mod tests {
         let small = SphereLattice::generate(DistributionMethod::CanonicalMidpoint, 120, 1.0)
             .unwrap()
             .surface_graph();
-        let large = SphereLattice::generate(
-            DistributionMethod::CanonicalMidpoint,
-            120,
-            radius_ratio,
-        )
-        .unwrap()
-        .surface_graph();
+        let large =
+            SphereLattice::generate(DistributionMethod::CanonicalMidpoint, 120, radius_ratio)
+                .unwrap()
+                .surface_graph();
 
         let assigner = PerlinNoiseAssigner::new(vec![], PerlinNoiseConfig::default());
         let small_frequency = assigner.noise_frequency(&small);
@@ -486,9 +478,10 @@ mod tests {
         assert!(terrain.contains(&TerrainType::Ice));
         assert!(terrain.contains(&TerrainType::IceMountain));
         assert!(
-            terrain
-                .iter()
-                .any(|&terrain_type| matches!(terrain_type, TerrainType::Water | TerrainType::DeepWater)),
+            terrain.iter().any(|&terrain_type| matches!(
+                terrain_type,
+                TerrainType::Water | TerrainType::DeepWater
+            )),
             "flood fill should leave temperate ocean outside the cap"
         );
     }
@@ -515,15 +508,12 @@ mod tests {
             if !matches!(terrain[node], TerrainType::Water | TerrainType::DeepWater) {
                 continue;
             }
-            let surrounded_by_ice = graph
-                .neighbors(node)
-                .iter()
-                .all(|&(neighbor, _)| {
-                    matches!(
-                        terrain[neighbor],
-                        TerrainType::Ice | TerrainType::IceMountain
-                    )
-                });
+            let surrounded_by_ice = graph.neighbors(node).iter().all(|&(neighbor, _)| {
+                matches!(
+                    terrain[neighbor],
+                    TerrainType::Ice | TerrainType::IceMountain
+                )
+            });
             assert!(
                 !surrounded_by_ice,
                 "polar flood fill should not leave enclosed water at node {node}"
@@ -576,10 +566,7 @@ mod tests {
         let terrain = assigner.assign(&graph, &mut rng);
 
         for terrain_type in TerrainType::ALL {
-            assert!(
-                terrain.contains(&terrain_type),
-                "missing {terrain_type:?}"
-            );
+            assert!(terrain.contains(&terrain_type), "missing {terrain_type:?}");
         }
     }
 

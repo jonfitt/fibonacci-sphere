@@ -2,8 +2,8 @@
 
 use std::collections::HashSet;
 
-use crate::topology::{build_voronoi_cell_fan_mesh, voronoi_cell_fan_apex, VoronoiFanMeshOptions};
 use crate::SphereLattice;
+use crate::topology::{VoronoiFanMeshOptions, build_voronoi_cell_fan_mesh, voronoi_cell_fan_apex};
 
 use crate::terrain::{AreaBorderKind, TerrainAreaPolygon, TerrainMap, TerrainType};
 
@@ -74,7 +74,8 @@ pub fn build_combined_terrain_mesh(
             mesh.normals.push(outward_normal(vertex));
         }
         for triangle in cell_mesh.triangles {
-            mesh.indices.extend(triangle.map(|index| base_index + index as u32));
+            mesh.indices
+                .extend(triangle.map(|index| base_index + index as u32));
         }
     }
 
@@ -89,12 +90,7 @@ pub fn build_combined_terrain_mesh_from_lattice(
 ) -> CombinedTerrainMesh {
     let positions = lattice.position_arrays();
     let polygons = lattice.terrain_area_polygons(terrain);
-    build_combined_terrain_mesh(
-        &polygons,
-        &positions,
-        lattice.radius() as f32,
-        options,
-    )
+    build_combined_terrain_mesh(&polygons, &positions, lattice.radius() as f32, options)
 }
 
 /// Undirected coastline segment endpoints (`[start, end, ...]`) deduplicated by site pair.
@@ -137,16 +133,20 @@ fn outward_normal(vertex: [f32; 3]) -> [f32; 3] {
         [0.0, 1.0, 0.0]
     } else {
         let inv_len = len_sq.sqrt().recip();
-        [vertex[0] * inv_len, vertex[1] * inv_len, vertex[2] * inv_len]
+        [
+            vertex[0] * inv_len,
+            vertex[1] * inv_len,
+            vertex[2] * inv_len,
+        ]
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::SphereLattice;
     use crate::methods::DistributionMethod;
     use crate::terrain::PerlinNoiseConfig;
-    use crate::SphereLattice;
     use rand::SeedableRng;
     use rand::rngs::StdRng;
 

@@ -14,10 +14,10 @@ use super::types::{ElevationBand, TerrainType};
 
 pub use perlin::{PerlinNoiseAssigner, PerlinNoiseConfig};
 pub use polar_flood::{
-    apply_polar_ice_flood, flood_polar_cap_membership, polar_ice_terrain_resistance,
-    PolarIceFloodParams, DEFAULT_POLAR_ICE_DEEP_WATER_RESISTANCE,
-    DEFAULT_POLAR_ICE_LAND_RESISTANCE, DEFAULT_POLAR_ICE_LATITUDE_COST,
-    DEFAULT_POLAR_ICE_MOUNTAIN_RESISTANCE, DEFAULT_POLAR_ICE_WATER_RESISTANCE,
+    DEFAULT_POLAR_ICE_DEEP_WATER_RESISTANCE, DEFAULT_POLAR_ICE_LAND_RESISTANCE,
+    DEFAULT_POLAR_ICE_LATITUDE_COST, DEFAULT_POLAR_ICE_MOUNTAIN_RESISTANCE,
+    DEFAULT_POLAR_ICE_WATER_RESISTANCE, PolarIceFloodParams, apply_polar_ice_flood,
+    flood_polar_cap_membership, polar_ice_terrain_resistance,
 };
 
 /// Assigns a terrain type to each lattice vertex.
@@ -49,9 +49,7 @@ pub struct RandomAssigner;
 
 impl TerrainAssigner for RandomAssigner {
     fn assign(&self, graph: &SurfaceGraph, rng: &mut dyn RngCore) -> Vec<TerrainType> {
-        (0..graph.len())
-            .map(|_| random_terrain(rng))
-            .collect()
+        (0..graph.len()).map(|_| random_terrain(rng)).collect()
     }
 }
 
@@ -133,9 +131,11 @@ mod tests {
         let mut rng = StdRng::seed_from_u64(3);
         let terrain = ClusterAssigner.assign(&graph, &mut rng);
         assert_eq!(terrain.len(), graph.len());
-        assert!(terrain.iter().all(|terrain_type| {
-            TerrainType::ALL.contains(terrain_type)
-        }));
+        assert!(
+            terrain
+                .iter()
+                .all(|terrain_type| { TerrainType::ALL.contains(terrain_type) })
+        );
     }
 
     #[test]
@@ -144,10 +144,7 @@ mod tests {
         let mut rng = StdRng::seed_from_u64(11);
         let terrain = ClusterAssigner.assign(&graph, &mut rng);
         for terrain_type in TerrainType::ALL {
-            assert!(
-                terrain.contains(&terrain_type),
-                "missing {terrain_type:?}"
-            );
+            assert!(terrain.contains(&terrain_type), "missing {terrain_type:?}");
         }
     }
 }
