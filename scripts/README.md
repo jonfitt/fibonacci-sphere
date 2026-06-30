@@ -11,8 +11,9 @@ Do not mix paths (for example, WSL files with Windows `cargo.exe`).
 
 ## Line endings
 
-This repository standardizes on **CRLF** for all text files (Windows, Linux, and WSL). Git
-enforces that via [`.gitattributes`](../.gitattributes). Set locally once per clone:
+This repository standardizes on **CRLF** for Rust, docs, and Windows scripts. **`godot/**` uses
+LF** because the Godot editor always writes LF. Git enforces that via
+[`.gitattributes`](../.gitattributes). Set locally once per clone:
 
 ```bash
 git config core.autocrlf false

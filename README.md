@@ -211,7 +211,8 @@ Integration smoke test: [`tests/integration.rs`](./tests/integration.rs) (`Spher
 
 ## Line endings
 
-All text files use **CRLF** on every platform. See [`.gitattributes`](./.gitattributes) and
+All text files use **CRLF** on every platform, except `godot/**` (LF — Godot always saves LF) and
+POSIX shell hooks/scripts (LF). See [`.gitattributes`](./.gitattributes) and
 [`.editorconfig`](./.editorconfig). After cloning:
 
 ```bash

@@ -1,8 +1,2 @@
 [source.crates-io]
-replace-with = "artifactory-remote-cargo"
-
-[source.artifactory-remote-cargo]
-registry = "sparse+https://cargo.packages.rsint.net/artifactory/api/cargo/crates-io/index/"
-
-[http]
-check-revoke = false
+registry = "sparse+https://index.crates.io/"
