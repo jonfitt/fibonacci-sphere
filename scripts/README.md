@@ -9,6 +9,19 @@ This repo supports two local development setups. Use the scripts that match wher
 
 Do not mix paths (for example, WSL files with Windows `cargo.exe`).
 
+## Line endings
+
+This repository standardizes on **CRLF** for all text files (Windows, Linux, and WSL). Git
+enforces that via [`.gitattributes`](../.gitattributes). Set locally once per clone:
+
+```bash
+git config core.autocrlf false
+git add --renormalize .
+```
+
+POSIX shell entry points (`.githooks/pre-commit`, `scripts/linux/*.sh`) stay **LF** so hooks
+and scripts execute on Linux/WSL. Editors should follow [`.editorconfig`](../.editorconfig).
+
 ## Linux / WSL (native cargo)
 
 ```bash
