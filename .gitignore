@@ -1,0 +1,5 @@
+/target
+# Godot 4 demo project (see docs/godot.md)
+/godot/.godot/
+# IDE and local tooling
+.idea/

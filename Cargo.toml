@@ -1,0 +1,25 @@
+[workspace]
+members = [".", "examples/sphere_lattice_visualizer", "extensions/fibonacci_sphere_gd"]
+default-members = [".", "extensions/fibonacci_sphere_gd"]
+resolver = "2"
+
+# Workspace layout:
+# - fibonacci_sphere (root): core library — point generation, topology, terrain
+# - examples/sphere_lattice_visualizer: interactive Bevy comparison app
+# - extensions/fibonacci_sphere_gd: Godot 4 GDExtension (cdylib)
+
+[package]
+name = "fibonacci_sphere"
+version = "0.1.0"
+edition = "2024"
+description = "Fibonacci sphere point distribution for game engines"
+license = "MIT OR Apache-2.0"
+
+[features]
+default = ["terrain"]
+terrain = ["dep:noise", "dep:rand"]
+
+[dependencies]
+noise = { version = "0.9", optional = true }
+rand = { version = "0.8", optional = true }
+thiserror = "2"

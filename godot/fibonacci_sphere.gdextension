@@ -1,0 +1,16 @@
+[configuration]
+
+entry_symbol = "gdext_rust_init"
+compatibility_minimum = 4.1
+reloadable = true
+
+[libraries]
+
+linux.debug.x86_64 = "res://../target/debug/libfibonacci_sphere_gd.so"
+linux.release.x86_64 = "res://../target/release/libfibonacci_sphere_gd.so"
+windows.debug.x86_64 = "res://../target/debug/fibonacci_sphere_gd.dll"
+windows.release.x86_64 = "res://../target/release/fibonacci_sphere_gd.dll"
+macos.debug = "res://../target/debug/libfibonacci_sphere_gd.dylib"
+macos.release = "res://../target/release/libfibonacci_sphere_gd.dylib"
+macos.debug.arm64 = "res://../target/debug/libfibonacci_sphere_gd.dylib"
+macos.release.arm64 = "res://../target/release/libfibonacci_sphere_gd.dylib"

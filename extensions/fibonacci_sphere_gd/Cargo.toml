@@ -1,0 +1,13 @@
+[package]
+name = "fibonacci_sphere_gd"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "Godot 4 GDExtension bindings for fibonacci_sphere"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+fibonacci_sphere = { path = "../.." }
+godot = "0.5.3"

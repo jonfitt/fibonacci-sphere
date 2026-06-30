@@ -1,0 +1,12 @@
+[package]
+name = "sphere_lattice_visualizer"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "Interactive visualizer for fibonacci_sphere lattice distributions (Bevy)"
+
+[dependencies]
+bevy = { version = "0.16", default-features = true, features = ["bevy_ui"] }
+dejavu = "2.37.0"
+fibonacci_sphere = { path = "../.." }
+rand = "0.8"

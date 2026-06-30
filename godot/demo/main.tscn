@@ -1,0 +1,201 @@
+[gd_scene load_steps=13 format=3 uid="uid://dry5mlk12ivmr"]
+
+[ext_resource type="Script" uid="uid://bcakctivnn6bx" path="res://demo/main.gd" id="1_main"]
+[ext_resource type="Script" uid="uid://c8k2m4n6p8q0r2s4t6" path="res://demo/orbit_camera.gd" id="2_camera"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_point"]
+radius = 0.01
+height = 0.02
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_point"]
+albedo_color = Color(1, 0.85, 0.2, 1)
+emission_enabled = true
+emission = Color(1, 0.85, 0.2, 1)
+emission_energy_multiplier = 0.5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_selected"]
+albedo_color = Color(1, 0.95, 0.35, 1)
+emission_enabled = true
+emission = Color(1, 0.95, 0.35, 1)
+emission_energy_multiplier = 1.2
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wireframe"]
+shading_mode = 0
+albedo_color = Color(0.4, 0.75, 1, 0.85)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_coastline"]
+shading_mode = 0
+albedo_color = Color(0.98, 0.98, 1, 1)
+render_priority = 1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_path"]
+shading_mode = 0
+albedo_color = Color(1, 0.35, 0.95, 1)
+render_priority = 2
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_axes"]
+shading_mode = 0
+vertex_color_use_as_albedo = true
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hud"]
+bg_color = Color(0.05, 0.06, 0.09, 0.82)
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_route"]
+bg_color = Color(0.05, 0.06, 0.09, 0.78)
+content_margin_left = 10.0
+content_margin_top = 8.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="Environment" id="Environment_main"]
+background_mode = 1
+background_color = Color(0.08, 0.09, 0.12, 1)
+
+[node name="Main" type="Node3D"]
+script = ExtResource("1_main")
+point_count = 6000
+terrain_seed = 1
+perlin_mountain_threshold = 0.55
+perlin_deep_water_threshold = 0.5
+perlin_spacing_factor = 0.2
+point_mesh = SubResource("SphereMesh_point")
+point_material = SubResource("StandardMaterial3D_point")
+wireframe_material = SubResource("StandardMaterial3D_wireframe")
+coastline_material = SubResource("StandardMaterial3D_coastline")
+path_material = SubResource("StandardMaterial3D_path")
+selected_point_material = SubResource("StandardMaterial3D_selected")
+
+[node name="Layout" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Layout"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 0
+
+[node name="HUDPanel" type="PanelContainer" parent="Layout/HBoxContainer"]
+custom_minimum_size = Vector2(700, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_hud")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Layout/HBoxContainer/HUDPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HUD" type="Label" parent="Layout/HBoxContainer/HUDPanel/ScrollContainer"]
+custom_minimum_size = Vector2(660, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.92, 0.94, 0.98, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.6)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 13
+text = "Loading…"
+autowrap_mode = 3
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="Layout/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="Layout/HBoxContainer/SubViewportContainer"]
+handle_input_locally = true
+size = Vector2i(980, 960)
+
+[node name="World" type="Node3D" parent="Layout/HBoxContainer/SubViewportContainer/SubViewport"]
+
+[node name="Terrain" type="MeshInstance3D" parent="Layout/HBoxContainer/SubViewportContainer/SubViewport/World"]
+
+[node name="Coastline" type="MeshInstance3D" parent="Layout/HBoxContainer/SubViewportContainer/SubViewport/World"]
+
+[node name="Wireframe" type="MeshInstance3D" parent="Layout/HBoxContainer/SubViewportContainer/SubViewport/World"]
+
+[node name="Path" type="MeshInstance3D" parent="Layout/HBoxContainer/SubViewportContainer/SubViewport/World"]
+
+[node name="Points" type="MultiMeshInstance3D" parent="Layout/HBoxContainer/SubViewportContainer/SubViewport/World"]
+material_override = SubResource("StandardMaterial3D_point")
+
+[node name="Axes" type="MeshInstance3D" parent="Layout/HBoxContainer/SubViewportContainer/SubViewport/World"]
+material_override = SubResource("StandardMaterial3D_axes")
+
+[node name="Camera3D" type="Camera3D" parent="Layout/HBoxContainer/SubViewportContainer/SubViewport/World"]
+transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 1.5, 3)
+current = true
+script = ExtResource("2_camera")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Layout/HBoxContainer/SubViewportContainer/SubViewport/World"]
+transform = Transform3D(0.866025, -0.353553, 0.353553, 0, 0.707107, 0.707107, -0.5, -0.612372, 0.612372, 0, 4, 0)
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Layout/HBoxContainer/SubViewportContainer/SubViewport/World"]
+environment = SubResource("Environment_main")
+
+[node name="RouteTerrainPanel" type="PanelContainer" parent="Layout/HBoxContainer/SubViewportContainer"]
+layout_mode = 2
+offset_left = 12.0
+offset_top = 12.0
+offset_right = 172.0
+offset_bottom = 204.0
+mouse_filter = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_route")
+
+[node name="MarginContainer" type="MarginContainer" parent="Layout/HBoxContainer/SubViewportContainer/RouteTerrainPanel"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Layout/HBoxContainer/SubViewportContainer/RouteTerrainPanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Title" type="Label" parent="Layout/HBoxContainer/SubViewportContainer/RouteTerrainPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Route terrain"
+
+[node name="Land" type="CheckBox" parent="Layout/HBoxContainer/SubViewportContainer/RouteTerrainPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+button_pressed = true
+text = "Land"
+
+[node name="Water" type="CheckBox" parent="Layout/HBoxContainer/SubViewportContainer/RouteTerrainPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+button_pressed = true
+text = "Water"
+
+[node name="DeepWater" type="CheckBox" parent="Layout/HBoxContainer/SubViewportContainer/RouteTerrainPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+button_pressed = true
+text = "Deep water"
+
+[node name="Mountain" type="CheckBox" parent="Layout/HBoxContainer/SubViewportContainer/RouteTerrainPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+button_pressed = true
+text = "Mountain"
+
+[node name="Ice" type="CheckBox" parent="Layout/HBoxContainer/SubViewportContainer/RouteTerrainPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+button_pressed = true
+text = "Ice"
+
+[node name="IceMountain" type="CheckBox" parent="Layout/HBoxContainer/SubViewportContainer/RouteTerrainPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+button_pressed = true
+text = "Ice mountain"
