@@ -131,4 +131,4 @@ cargo test -p fibonacci_sphere
 cargo test --workspace
 ```
 
-Integration tests: [`tests/integration.rs`](../tests/integration.rs).
+Integration smoke test: [`tests/integration.rs`](../tests/integration.rs) (`SphereLattice` routing facade).

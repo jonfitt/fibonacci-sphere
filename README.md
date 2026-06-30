@@ -127,6 +127,42 @@ cargo build -p fibonacci_sphere --no-default-features
 Interactive comparison of distribution methods with Delaunay wireframe, Voronoi terrain fill
 (combined meshes by terrain type), coastline borders, and Perlin controls.
 
+### System dependencies (Linux / WSL)
+
+`sphere_lattice_visualizer` uses Bevy and links against system libraries for audio, windowing,
+input, and Vulkan. The core library and Godot extension do not need these packages.
+
+On Debian/Ubuntu/WSL:
+
+```bash
+./scripts/linux/setup-bevy-deps.sh
+```
+
+Manual install (same packages as the script):
+
+```bash
+sudo apt install build-essential pkg-config libasound2-dev libudev-dev \
+  libx11-dev libxcursor-dev libxi-dev libxrandr-dev \
+  libwayland-dev libxkbcommon-dev libvulkan-dev
+```
+
+| Package | Purpose |
+|---------|---------|
+| `build-essential` | C/C++ linker (`cc`) for native build scripts |
+| `pkg-config` | Locate system libraries during `build.rs` |
+| `libasound2-dev` | ALSA audio |
+| `libudev-dev` | Input and device enumeration |
+| `libx11-dev`, `libxcursor-dev`, `libxi-dev`, `libxrandr-dev` | X11 windowing |
+| `libwayland-dev`, `libxkbcommon-dev` | Wayland and keyboard |
+| `libvulkan-dev` | Vulkan rendering (WGPU) |
+
+See also [Bevy Linux setup](https://bevyengine.org/learn/quick-start/getting-started/setup/).
+
+**Running the GUI on WSL** requires [WSLg](https://learn.microsoft.com/en-us/windows/wsl/tutorials/gui-apps)
+(Windows 11) or an X server. Building does not require a display.
+
+### Run
+
 ```bash
 cargo run -p sphere_lattice_visualizer --release
 ```
@@ -171,7 +207,7 @@ cargo test -p fibonacci_sphere
 cargo test --workspace
 ```
 
-Integration tests: [`tests/integration.rs`](./tests/integration.rs).
+Integration smoke test: [`tests/integration.rs`](./tests/integration.rs) (`SphereLattice` routing facade).
 
 ## Line endings
 

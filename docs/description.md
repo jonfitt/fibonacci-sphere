@@ -318,7 +318,6 @@ use fibonacci_sphere::SphereLattice;
 
 - They **cannot** call private functions inside `src/lattice.rs`.
 - They prove the exported API works together end-to-end.
-- `tests/common/mod.rs` holds shared helpers for these files (`mod common;` in `integration.rs`).
 
 **Why not put everything in `tests/`?** Unit tests next to implementation are easier to maintain and can test private helpers. Integration tests catch “the public surface is wrong or incomplete.”
 
