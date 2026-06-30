@@ -16,3 +16,7 @@ end_of_line = lf
 
 [scripts/linux/**]
 end_of_line = lf
+
+# Godot saves LF on all platforms (see .gitattributes).
+[godot/**]
+end_of_line = lf
