@@ -28,9 +28,13 @@ and scripts execute on Linux/WSL. Editors should follow [`.editorconfig`](../.ed
 ./scripts/linux/ci-check.sh              # fmt, clippy, build, test
 ./scripts/linux/setup-git-hooks.sh       # once per clone
 ./scripts/linux/setup-branch-protection.sh
+./scripts/linux/setup-bevy-deps.sh       # Bevy visualizer system packages (apt)
 ```
 
 Requires `cargo`, `rustfmt`, and `clippy` on your `PATH`. On WSL, install a Linux toolchain (`build-essential`, `rustup`).
+
+`setup-bevy-deps.sh` installs apt packages needed to **build** `sphere_lattice_visualizer` only
+(ALSA, X11/Wayland, Vulkan dev headers). The core library and Godot extension do not need it.
 
 ## Windows (native cargo)
 
