@@ -10,4 +10,4 @@ license.workspace = true
 bevy = { version = "0.16", default-features = true, features = ["bevy_ui"] }
 dejavu = "2.37.0"
 fibonacci_sphere = { path = "../.." }
-rand = "0.8"
+rand = "0.10"

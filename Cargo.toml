@@ -25,5 +25,5 @@ terrain = ["dep:noise", "dep:rand"]
 
 [dependencies]
 noise = { version = "0.9", optional = true }
-rand = { version = "0.8", optional = true }
+rand = { version = "0.10", optional = true }
 thiserror = "2"
