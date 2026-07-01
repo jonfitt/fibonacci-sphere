@@ -10,4 +10,4 @@ crate-type = ["cdylib"]
 
 [dependencies]
 fibonacci_sphere = { path = "../.." }
-godot = "0.5.3"
+godot = { version = "0.5.4", features = ["register-docs"] }

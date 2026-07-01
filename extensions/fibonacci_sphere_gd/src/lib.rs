@@ -21,50 +21,68 @@ struct FibonacciSphereExtension;
 #[gdextension]
 unsafe impl ExtensionLibrary for FibonacciSphereExtension {}
 
-/// Terrain type indices exposed to Godot (`Land`=0, `Water`=1, `DeepWater`=2, `Mountain`=3, `Ice`=4, `IceMountain`=5).
+/// Terrain type indices for lattice vertices and routing filters.
+///
+/// Use with `get_terrain_type_at`, `shortest_surface_path_*_with_allowed_terrain`, and border helpers.
+/// Indices match `FibonacciTerrainType.LAND`, `WATER`, and so on.
 #[derive(GodotClass)]
 #[class(no_init, base = RefCounted)]
 pub struct FibonacciTerrainType;
 
 #[godot_api]
 impl FibonacciTerrainType {
+    /// Temperate land (above sea level, below mountain threshold).
     #[constant]
     const LAND: i32 = 0;
+    /// Shallow water.
     #[constant]
     const WATER: i32 = 1;
+    /// Deep water.
     #[constant]
     const DEEP_WATER: i32 = 2;
+    /// Mountain (high elevation).
     #[constant]
     const MOUNTAIN: i32 = 3;
+    /// Ice within a polar cap flood region.
     #[constant]
     const ICE: i32 = 4;
+    /// Ice-covered mountain within a polar cap flood region.
     #[constant]
     const ICE_MOUNTAIN: i32 = 5;
 
+    /// Number of terrain types (currently 6).
     #[func]
     fn get_count() -> i32 {
         TerrainType::ALL.len() as i32
     }
 }
 
-/// Border kind indices for terrain area polygon edges.
+/// Border classification for one edge of a Voronoi terrain area polygon.
+///
+/// Returned by `classify_border_between_terrain_types` and `FibonacciTerrainArea.get_edge_border_kinds`.
 #[derive(GodotClass)]
 #[class(no_init, base = RefCounted)]
 pub struct FibonacciAreaBorderKind;
 
 #[godot_api]
 impl FibonacciAreaBorderKind {
+    /// Both adjacent cells share the same terrain class grouping.
     #[constant]
     const SAME_TYPE: i32 = 0;
+    /// Edge crosses sea level (land/mountain vs water/deep water).
     #[constant]
     const COASTLINE: i32 = 1;
+    /// Edge separates shallow and deep water.
     #[constant]
     const SHALLOW_DEEP_WATER: i32 = 2;
+    /// Edge separates land and mountain (no sea-level crossing).
     #[constant]
     const LAND_MOUNTAIN: i32 = 3;
 }
 
-/// One Voronoi terrain area polygon for meshing and texturing in Godot.
+/// One Voronoi terrain cell on the sphere: boundary loop, neighbor indices, and per-edge border kinds.
+///
+/// Produced by `FibonacciSphere.get_terrain_area_polygons` after terrain generation.
 #[derive(GodotClass)]
 #[class(no_init, base = RefCounted)]
 pub struct FibonacciTerrainArea {
@@ -77,31 +95,39 @@ pub struct FibonacciTerrainArea {
 
 #[godot_api]
 impl FibonacciTerrainArea {
+    /// Lattice vertex index that owns this Voronoi cell (the generator site).
     #[func]
     fn get_site_index(&self) -> i32 {
         self.site_index
     }
 
+    /// Terrain type index for this cell (`FibonacciTerrainType.LAND`, etc.).
     #[func]
     fn get_terrain_type(&self) -> i32 {
         self.terrain_type
     }
 
+    /// Closed boundary polyline in world space (Y-up, sphere radius already applied).
     #[func]
     fn get_boundary(&self) -> PackedVector3Array {
         self.boundary.clone()
     }
 
+    /// Lattice vertex index for each boundary vertex (parallel to `get_boundary`).
     #[func]
     fn get_boundary_neighbors(&self) -> PackedInt32Array {
         self.boundary_neighbors.clone()
     }
 
+    /// `FibonacciAreaBorderKind` index for each boundary edge (parallel to boundary segments).
     #[func]
     fn get_edge_border_kinds(&self) -> PackedInt32Array {
         self.edge_border_kinds.clone()
     }
 
+    /// Returns true when `edge_index` is a coastline edge (`FibonacciAreaBorderKind.COASTLINE`).
+    ///
+    /// Returns false for negative or out-of-range indices.
     #[func]
     fn is_coastline_edge(&self, edge_index: i32) -> bool {
         if edge_index < 0 {
@@ -113,9 +139,15 @@ impl FibonacciTerrainArea {
     }
 }
 
-/// Generates and caches Fibonacci sphere lattices for Godot scenes.
+/// Stateful Fibonacci sphere generator for Godot 4.
 ///
-/// Coordinates are Y-up and match Godot 4's default 3D frame without conversion.
+/// Generates evenly distributed points on a sphere, builds a spherical Delaunay wireframe for
+/// routing, assigns Perlin terrain, and exposes batch mesh helpers.
+///
+/// Coordinates are **Y-up, right-handed** and match Godot 4's default 3D frame without conversion.
+///
+/// Typical workflow: `generate_with_terrain` (or `generate` + `generate_terrain`), then
+/// `get_terrain_mesh_data`, `populate_point_multimesh`, and path queries.
 #[derive(GodotClass)]
 #[class(init, base = RefCounted)]
 pub struct FibonacciSphere {
@@ -139,6 +171,13 @@ struct DerivedRenderCache {
 
 #[godot_api]
 impl FibonacciSphere {
+    /// Generate a point lattice and cache its surface graph for routing.
+    ///
+    /// `method` is a distribution index `0..5` (see `get_method_description`).
+    /// `n` is the point count (at least 1). `radius` is the sphere radius in Godot units (positive).
+    ///
+    /// Clears any previously cached terrain. On failure, logs an error and returns an empty array.
+    /// Use `get_positions` later without regenerating.
     #[func]
     fn generate(&mut self, method: i32, n: i32, radius: f32) -> PackedVector3Array {
         if !self.try_generate_lattice(method, n, radius) {
@@ -151,9 +190,19 @@ impl FibonacciSphere {
             .unwrap_or_default()
     }
 
-    /// Generate a lattice and Perlin terrain in one call.
+    /// Generate a lattice and Perlin terrain in one call (recommended for games and the demo).
     ///
-    /// Pass `seed` < 0 to pick a seed from the internal RNG. Returns an empty array on error.
+    /// Distribution: `method` (`0..5`), `n` (point count), `radius` (sphere radius).
+    ///
+    /// Terrain: `mountain_threshold`, `deep_water_threshold`, and `spacing_factor` are Perlin bands
+    /// in `0.0..1.0` (spacing typically `0.01..4.0`). Pass `seed < 0` for a random terrain seed.
+    ///
+    /// Polar ice: `north_polar_ice_distance` and `south_polar_ice_distance` are maximum angular
+    /// reach from each pole in radians (`0` disables). Resistance values control how easily ice
+    /// flood fill crosses mountains, land, water, and deep water. `polar_ice_latitude_cost` adds
+    /// uniform cost per geodesic edge (higher → rounder caps).
+    ///
+    /// Returns vertex positions on success, or an empty array on error.
     #[func]
     fn generate_with_terrain(
         &mut self,
@@ -198,9 +247,12 @@ impl FibonacciSphere {
             .unwrap_or_default()
     }
 
-    /// Generate Perlin terrain for the cached lattice.
+    /// Assign Perlin terrain to the cached lattice (call after `generate`).
     ///
-    /// Pass `seed` < 0 to pick a seed from the internal RNG. Returns `false` on error.
+    /// Same parameters as the terrain portion of `generate_with_terrain`. Pass `seed < 0` for a
+    /// random seed. Invalidates cached mesh data until the next `get_terrain_mesh_data` call.
+    ///
+    /// Returns `false` when no lattice exists or parameters are invalid.
     #[func]
     fn generate_terrain(
         &mut self,
@@ -231,7 +283,9 @@ impl FibonacciSphere {
         )
     }
 
-    /// Returns positions from the last successful [`Self::generate`] call.
+    /// World-space vertex positions from the last successful `generate` or `generate_with_terrain`.
+    ///
+    /// Returns an empty array when no lattice is cached.
     #[func]
     fn get_positions(&self) -> PackedVector3Array {
         self.lattice
@@ -240,7 +294,9 @@ impl FibonacciSphere {
             .unwrap_or_default()
     }
 
-    /// Line segment endpoints for wireframe rendering (`[start, end, ...]`).
+    /// Spherical Delaunay wireframe as paired segment endpoints: `[start, end, start, end, ...]`.
+    ///
+    /// Requires a cached lattice. Same edge set used by surface pathfinding.
     #[func]
     fn get_wireframe_segments(&self) -> PackedVector3Array {
         self.lattice
@@ -255,7 +311,9 @@ impl FibonacciSphere {
             .unwrap_or_default()
     }
 
-    /// Terrain type at a vertex index (`-1` when terrain is not generated or index is invalid).
+    /// Terrain type index at `vertex_index` (`FibonacciTerrainType` constants).
+    ///
+    /// Returns `-1` when terrain is missing or the index is out of range.
     #[func]
     fn get_terrain_type_at(&self, vertex_index: i32) -> i32 {
         if vertex_index < 0 {
@@ -274,13 +332,16 @@ impl FibonacciSphere {
         terrain.get(index).godot_index()
     }
 
-    /// Whether terrain has been generated for the cached lattice.
+    /// True after a successful `generate_terrain` or `generate_with_terrain`.
     #[func]
     fn has_terrain(&self) -> bool {
         self.terrain.is_some()
     }
 
-    /// Voronoi terrain area polygons for texturing (`[]` when terrain or lattice is missing).
+    /// Voronoi terrain area polygons for custom meshing or inspection.
+    ///
+    /// Requires generated terrain. Returns an empty array when the lattice or terrain is missing.
+    /// Results are cached until the lattice or terrain changes.
     #[func]
     fn get_terrain_area_polygons(&self) -> Array<Gd<FibonacciTerrainArea>> {
         match self.derived_cache.as_ref() {
@@ -304,9 +365,11 @@ impl FibonacciSphere {
         }
     }
 
-    /// Combined terrain mesh arrays for Godot rendering.
+    /// Combined terrain mesh for one `ArrayMesh` build: `[vertices, colors, normals, indices]`.
     ///
-    /// Returns `[vertices, colors, normals, indices]` or an empty array on failure.
+    /// Each element is a `PackedVector3Array`, `PackedColorArray`, or `PackedInt32Array`.
+    /// Requires terrain. Prefer this over per-cell `build_voronoi_cell_fan_mesh` loops.
+    /// Returns an empty array on failure.
     #[func]
     fn get_terrain_mesh_data(&mut self) -> Array<Variant> {
         self.rebuild_derived_cache();
@@ -316,7 +379,10 @@ impl FibonacciSphere {
         combined_mesh_to_godot(&cache.terrain_mesh)
     }
 
-    /// Coastline segment endpoints (`[start, end, ...]`) deduplicated in Rust.
+    /// Deduplicated coastline segment pairs: `[start, end, ...]` across all terrain cells.
+    ///
+    /// Coastline edges cross sea level (land/mountain vs water/deep water). Requires terrain.
+    /// Feed into `build_ribbon_line_mesh` for thick line rendering.
     #[func]
     fn get_coastline_segments(&mut self) -> PackedVector3Array {
         self.rebuild_derived_cache();
@@ -326,9 +392,13 @@ impl FibonacciSphere {
         positions_to_packed(&cache.coastline_segments)
     }
 
-    /// Build a ribbon triangle mesh from paired segment endpoints.
+    /// Expand paired segment endpoints into a ribbon triangle mesh (static helper).
     ///
-    /// Returns `[vertices, indices]` or an empty array when input is invalid.
+    /// `segments` is `[start, end, start, end, ...]`. `width` is the ribbon width in world units.
+    /// `lift` radially offsets vertices outward from the origin (fraction of radius).
+    ///
+    /// Returns `[vertices: PackedVector3Array, indices: PackedInt32Array]` or an empty array when
+    /// input is invalid.
     #[func]
     fn build_ribbon_line_mesh(
         segments: PackedVector3Array,
@@ -344,7 +414,12 @@ impl FibonacciSphere {
         ribbon_mesh_to_godot(&ribbon)
     }
 
-    /// Configure a [`MultiMesh`] with one instance per lattice vertex.
+    /// Fill a `MultiMesh` with one instance per lattice vertex (efficient point clouds).
+    ///
+    /// Sets `use_colors`, `instance_count`, transforms, and a default color per instance.
+    /// `lift` pushes points slightly above the sphere surface along the outward normal.
+    ///
+    /// Returns `false` when no lattice is cached.
     #[func]
     fn populate_point_multimesh(
         &self,
@@ -374,7 +449,10 @@ impl FibonacciSphere {
         true
     }
 
-    /// Update highlight colors on an already populated point [`MultiMesh`].
+    /// Highlight route endpoints on a `MultiMesh` populated by `populate_point_multimesh`.
+    ///
+    /// Sets `selected_color` on `from_index` and `to_index`; all other instances use `default_color`.
+    /// Pass `-1` for an unused endpoint. Returns `false` when no lattice is cached.
     #[func]
     fn update_point_multimesh_highlights(
         &self,
@@ -401,7 +479,9 @@ impl FibonacciSphere {
         true
     }
 
-    /// Classify the border between two terrain type indices.
+    /// Classify the border between two `FibonacciTerrainType` indices.
+    ///
+    /// Returns a `FibonacciAreaBorderKind` constant, or `-1` for invalid type indices.
     #[func]
     fn classify_border_between_terrain_types(left: i32, right: i32) -> i32 {
         match (
@@ -416,7 +496,7 @@ impl FibonacciSphere {
         }
     }
 
-    /// Returns true when the border between two terrain types crosses sea level.
+    /// Returns true when the border between two terrain types crosses sea level (coastline).
     #[func]
     fn is_coastline_between_terrain_types(left: i32, right: i32) -> bool {
         match (
@@ -430,7 +510,9 @@ impl FibonacciSphere {
         }
     }
 
-    /// Angular distance from a vertex to the north pole, in radians (`-1.0` on error).
+    /// Geodesic angular distance from `vertex_index` to the north pole (+Y), in radians.
+    ///
+    /// Returns `-1.0` on error (no lattice or invalid index).
     #[func]
     fn angular_distance_to_north_pole(&self, vertex_index: i32) -> f32 {
         self.angular_distance_at(vertex_index, |lattice, index| {
@@ -438,7 +520,9 @@ impl FibonacciSphere {
         })
     }
 
-    /// Angular distance from a vertex to the south pole, in radians (`-1.0` on error).
+    /// Geodesic angular distance from `vertex_index` to the south pole (-Y), in radians.
+    ///
+    /// Returns `-1.0` on error.
     #[func]
     fn angular_distance_to_south_pole(&self, vertex_index: i32) -> f32 {
         self.angular_distance_at(vertex_index, |lattice, index| {
@@ -446,7 +530,9 @@ impl FibonacciSphere {
         })
     }
 
-    /// Angular distance from a vertex to the equator, in radians (`-1.0` on error).
+    /// Angular distance from `vertex_index` to the equator (XZ plane), in radians.
+    ///
+    /// Returns `-1.0` on error.
     #[func]
     fn angular_distance_to_equator(&self, vertex_index: i32) -> f32 {
         self.angular_distance_at(vertex_index, |lattice, index| {
@@ -454,7 +540,9 @@ impl FibonacciSphere {
         })
     }
 
-    /// Vertex indices within `max_angle` radians of the north pole.
+    /// Lattice vertex indices within `max_angle` radians of the north pole.
+    ///
+    /// Returns an empty array when no lattice is cached.
     #[func]
     fn vertices_within_north_polar_distance(&self, max_angle: f64) -> PackedInt32Array {
         self.lattice
@@ -465,7 +553,7 @@ impl FibonacciSphere {
             .unwrap_or_default()
     }
 
-    /// Vertex indices within `max_angle` radians of the south pole.
+    /// Lattice vertex indices within `max_angle` radians of the south pole.
     #[func]
     fn vertices_within_south_polar_distance(&self, max_angle: f64) -> PackedInt32Array {
         self.lattice
@@ -476,7 +564,7 @@ impl FibonacciSphere {
             .unwrap_or_default()
     }
 
-    /// Vertex indices within `max_angle` radians of the equator.
+    /// Lattice vertex indices within `max_angle` radians of the equator.
     #[func]
     fn vertices_within_equatorial_distance(&self, max_angle: f64) -> PackedInt32Array {
         self.lattice
@@ -487,7 +575,9 @@ impl FibonacciSphere {
             .unwrap_or_default()
     }
 
-    /// Index of the lattice vertex nearest to a world-space position (`-1` on error).
+    /// Closest lattice vertex to a world-space position on the sphere.
+    ///
+    /// Useful for mapping raycast hits to route endpoints. Returns `-1` on error.
     #[func]
     fn find_nearest_vertex_index(&self, position: Vector3) -> i32 {
         let Some(lattice) = self.lattice.as_ref() else {
@@ -504,9 +594,10 @@ impl FibonacciSphere {
         }
     }
 
-    /// World-space fan apex for triangulating a Voronoi terrain cell mesh.
+    /// Fan triangulation apex for one Voronoi terrain cell mesh.
     ///
-    /// Polar-extreme cells use the geographic pole; all others use the generator site.
+    /// Polar-extreme cells use the geographic pole; all others use the generator site position.
+    /// Returns `Vector3.ZERO` on error.
     #[func]
     fn get_voronoi_fan_apex_position(&self, site_index: i32) -> Vector3 {
         if site_index < 0 {
@@ -530,7 +621,9 @@ impl FibonacciSphere {
         Vector3::new(apex[0] * radius, apex[1] * radius, apex[2] * radius)
     }
 
-    /// Vertex indices along the shortest surface path (`[]` on error).
+    /// Shortest path vertex indices along Delaunay mesh edges (geodesic weights).
+    ///
+    /// Requires a cached lattice from `generate`. Returns an empty array on error.
     #[func]
     fn shortest_surface_path_indices(&self, from_index: i32, to_index: i32) -> PackedInt32Array {
         self.shortest_surface_path_indices_with_allowed_terrain(
@@ -540,9 +633,10 @@ impl FibonacciSphere {
         )
     }
 
-    /// Vertex indices along the shortest surface path restricted to allowed terrain types.
+    /// Shortest path indices restricted to vertices whose terrain type is in `allowed_terrain_types`.
     ///
-    /// Pass an empty `allowed_terrain_types` array to allow every terrain type.
+    /// Pass an empty array to allow every terrain type (same as `shortest_surface_path_indices`).
+    /// Terrain-filtered routing requires `generate_terrain` first.
     #[func]
     fn shortest_surface_path_indices_with_allowed_terrain(
         &self,
@@ -569,7 +663,9 @@ impl FibonacciSphere {
         }
     }
 
-    /// World positions along the shortest surface path (`[]` on error).
+    /// World positions along the shortest surface path between two vertex indices.
+    ///
+    /// Returns an empty array on error.
     #[func]
     fn shortest_surface_path_positions(
         &self,
@@ -583,7 +679,9 @@ impl FibonacciSphere {
         )
     }
 
-    /// World positions along the shortest surface path restricted to allowed terrain types.
+    /// World positions along the shortest path restricted to allowed terrain types.
+    ///
+    /// Pass an empty `allowed_terrain_types` array to allow every type.
     #[func]
     fn shortest_surface_path_positions_with_allowed_terrain(
         &self,
@@ -619,7 +717,9 @@ impl FibonacciSphere {
             .collect()
     }
 
-    /// Total geodesic length of the shortest surface path (`-1.0` on error).
+    /// Total geodesic length of the shortest surface path (same units as lattice radius).
+    ///
+    /// Returns `-1.0` on error.
     #[func]
     fn shortest_surface_path_length(&self, from_index: i32, to_index: i32) -> f32 {
         self.shortest_surface_path_length_with_allowed_terrain(
@@ -629,7 +729,9 @@ impl FibonacciSphere {
         )
     }
 
-    /// Total geodesic length of the shortest surface path restricted to allowed terrain types.
+    /// Geodesic path length restricted to allowed terrain types.
+    ///
+    /// Returns `-1.0` on error.
     #[func]
     fn shortest_surface_path_length_with_allowed_terrain(
         &self,
@@ -652,9 +754,13 @@ impl FibonacciSphere {
         }
     }
 
-    /// Build fan-triangulated mesh data for one Voronoi cell.
+    /// Fan-triangulate one Voronoi cell for custom rendering.
     ///
-    /// Returns `[vertices: PackedVector3Array, indices: PackedInt32Array]` or an empty array on failure.
+    /// `fan_apex` is typically from `get_voronoi_fan_apex_position`. `boundary` is the cell loop.
+    /// `radius` scales unit directions to world space.
+    ///
+    /// Returns `[vertices: PackedVector3Array, indices: PackedInt32Array]` or an empty array on
+    /// failure. For the full sphere, prefer `get_terrain_mesh_data`.
     #[func]
     fn build_voronoi_cell_fan_mesh(
         &self,
@@ -697,13 +803,13 @@ impl FibonacciSphere {
         result
     }
 
-    /// Number of points in the cached lattice (0 if not generated yet).
+    /// Number of points in the cached lattice (`0` when not generated).
     #[func]
     fn get_point_count(&self) -> i32 {
         self.lattice.as_ref().map(|l| l.len() as i32).unwrap_or(0)
     }
 
-    /// Radius used for the cached lattice.
+    /// Sphere radius used by the cached lattice (`0.0` when not generated).
     #[func]
     fn get_radius(&self) -> f32 {
         self.lattice
@@ -712,7 +818,7 @@ impl FibonacciSphere {
             .unwrap_or(0.0)
     }
 
-    /// Godot method index of the cached lattice (`-1` if not generated).
+    /// Distribution method index of the cached lattice (`0..5`, or `-1` when not generated).
     #[func]
     fn get_method_index(&self) -> i32 {
         self.lattice
@@ -721,7 +827,7 @@ impl FibonacciSphere {
             .unwrap_or(-1)
     }
 
-    /// Clears the cached lattice and terrain.
+    /// Drop the cached lattice, surface graph, terrain, and derived mesh data.
     #[func]
     fn clear(&mut self) {
         self.lattice = None;
@@ -730,7 +836,9 @@ impl FibonacciSphere {
         self.derived_cache = None;
     }
 
-    /// One-shot helper: generate and return positions without retaining state.
+    /// One-shot lattice generation without retaining state (static helper).
+    ///
+    /// Same parameters as `generate`. Useful for quick probes; use an instance for routing/terrain.
     #[func]
     fn generate_positions(method: i32, n: i32, radius: f32) -> PackedVector3Array {
         let mut generator = FibonacciSphere {
@@ -748,7 +856,9 @@ impl FibonacciSphere {
         DistributionMethod::ALL.len() as i32
     }
 
-    /// Multi-line literature-backed description for a method index.
+    /// Multi-line literature-backed description for a distribution method index.
+    ///
+    /// Returns an empty string for invalid indices. Suitable for HUD help text.
     #[func]
     fn get_method_description(method: i32) -> GString {
         DistributionMethod::from_godot_index(method)

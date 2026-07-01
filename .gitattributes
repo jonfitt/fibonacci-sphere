@@ -5,6 +5,7 @@
 
 # Godot rewrites project/scene/script files as LF on every platform (including Windows).
 godot/** text eol=lf
+packaging/godot-addon/** text eol=lf
 
 # POSIX shell entry points must stay LF so they execute on Linux/WSL (shebang line).
 .githooks/pre-commit text eol=lf

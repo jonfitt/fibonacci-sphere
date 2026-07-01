@@ -1,0 +1,11 @@
+[configuration]
+
+entry_symbol = "gdext_rust_init"
+compatibility_minimum = 4.3
+reloadable = false
+
+[libraries]
+
+linux.release.x86_64 = "res://addons/fibonacci_sphere/bin/linux/x86_64/libfibonacci_sphere_gd.so"
+windows.release.x86_64 = "res://addons/fibonacci_sphere/bin/windows/x86_64/fibonacci_sphere_gd.dll"
+macos.release.arm64 = "res://addons/fibonacci_sphere/bin/macos/arm64/libfibonacci_sphere_gd.dylib"

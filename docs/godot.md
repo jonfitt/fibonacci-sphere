@@ -6,7 +6,32 @@ and match Godot 4's default 3D frame without conversion.
 The extension depends on the core library. Spherical Delaunay wireframe, Voronoi terrain polygons,
 and pathfinding are all part of the default build.
 
-## Build the extension
+## Install from a release
+
+Prebuilt binaries are attached to [GitHub Releases](https://github.com/jonfitt/fibonacci-sphere/releases)
+when you push a version tag on `main` (for example `v0.1.0`).
+
+| Artifact | Contents |
+|----------|----------|
+| `fibonacci_sphere-<version>.zip` | Addon only — extract `fibonacci_sphere/` into your project's `addons/` folder |
+| `fibonacci_sphere-demo-<version>.zip` | Standalone demo project with the prebuilt addon under `addons/fibonacci_sphere/` |
+
+Zip file names use the version **without** the `v` prefix (`0.1.0`, not `v0.1.0`). Supported
+platforms: Linux (x86_64), Windows (x86_64), macOS (Apple Silicon). Intel Macs are not shipped.
+
+Open the demo zip's `project.godot` in Godot 4.3+ and press Play. No Rust toolchain required.
+
+To cut a release from this repository:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+CI builds the GDExtension on Linux, Windows, and macOS (arm64), assembles both zips, and publishes
+the GitHub Release.
+
+## Build the extension (development)
 
 From the repository root:
 
@@ -29,7 +54,7 @@ Windows so `cargo` matches the platform where you run Godot (`.so` on Linux, `.d
 
 ## Open the demo project
 
-1. Install Godot 4.1 or later.
+1. Install Godot 4.3 or later (required for in-editor API docs from Rust `///` comments).
 2. Open `godot/project.godot` in the Godot editor.
 3. Ensure the extension built successfully (Godot loads `godot/fibonacci_sphere.gdextension`).
 4. Run the main scene (`demo/main.tscn`).
@@ -64,6 +89,12 @@ points render via a **`MultiMeshInstance3D`** (one draw call, not thousands of s
 lines mark +X (red), +Y (green), and +Z (blue).
 
 On first open, Godot creates `godot/.godot/extension_list.cfg` automatically.
+
+### In-editor API docs
+
+After building the extension with the `register-docs` feature, press **F1** in Godot and search for
+`FibonacciSphere`, `FibonacciTerrainArea`, or related classes. Method docs come from the Rust `///`
+comments in `extensions/fibonacci_sphere_gd/src/lib.rs`. Longer examples and tables remain in this file.
 
 ## GDExtension types
 

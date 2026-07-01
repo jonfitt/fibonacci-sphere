@@ -30,6 +30,7 @@ and scripts execute on Linux/WSL. Editors should follow [`.editorconfig`](../.ed
 ./scripts/linux/setup-git-hooks.sh       # once per clone
 ./scripts/linux/setup-branch-protection.sh
 ./scripts/linux/setup-bevy-deps.sh       # Bevy visualizer system packages (apt)
+./scripts/linux/package-godot-release.sh # assemble release zips (needs all platform binaries)
 ```
 
 Requires `cargo`, `rustfmt`, and `clippy` on your `PATH`. On WSL, install a Linux toolchain (`build-essential`, `rustup`).
