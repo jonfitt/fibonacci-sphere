@@ -32,7 +32,7 @@ and scripts execute on Linux/WSL. Editors should follow [`.editorconfig`](../.ed
 ./scripts/linux/setup-bevy-deps.sh       # Bevy visualizer system packages (apt)
 ./scripts/linux/package-godot-release.sh # assemble release zips (needs all platform binaries)
 ./scripts/linux/bump-version.sh        # bump VERSION, sync manifests, commit, tag
-./scripts/linux/sync-version.sh        # apply VERSION to Cargo.toml and docs/description.md
+./scripts/linux/sync-version.sh        # apply VERSION to Cargo.toml, Cargo.lock, and docs/description.md
 ```
 
 Requires `cargo`, `rustfmt`, and `clippy` on your `PATH`. On WSL, install a Linux toolchain (`build-essential`, `rustup`).

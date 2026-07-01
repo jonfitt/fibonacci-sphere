@@ -1,4 +1,4 @@
-# Apply VERSION to Cargo.toml and docs/description.md without bumping.
+# Apply VERSION to Cargo.toml, Cargo.lock, and docs/description.md without bumping.
 $ErrorActionPreference = "Stop"
 . "$PSScriptRoot/version-lib.ps1"
 $root = Get-RepoRoot

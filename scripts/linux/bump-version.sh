@@ -7,7 +7,7 @@
 #   ./scripts/linux/bump-version.sh --no-commit minor
 #
 # VERSION is the single source of truth. Cargo.toml workspace members use
-# version.workspace = true; this script syncs VERSION into Cargo.toml and
+# version.workspace = true; this script syncs VERSION into Cargo.toml, Cargo.lock, and
 # docs/description.md before creating tag vX.Y.Z.
 
 set -euo pipefail
@@ -25,7 +25,7 @@ usage() {
 Usage: bump-version.sh [--no-commit] [major|minor|patch]
 
 Interactively choose a semver bump unless major, minor, or patch is given.
-Updates VERSION, syncs Cargo.toml and docs/description.md, commits, and tags vX.Y.Z.
+Updates VERSION, syncs Cargo.toml, Cargo.lock, and docs/description.md, commits, and tags vX.Y.Z.
 EOF
 }
 
@@ -120,7 +120,7 @@ sync_version_repo_root "${ROOT}" >/dev/null
 echo "Bumped version: ${CURRENT} -> ${NEW_VERSION}"
 
 if [[ "${COMMIT}" -eq 1 ]]; then
-  git -C "${ROOT}" add VERSION Cargo.toml docs/description.md
+  git -C "${ROOT}" add VERSION Cargo.toml Cargo.lock docs/description.md
   if ! git -C "${ROOT}" diff --cached --quiet; then
     git -C "${ROOT}" commit -m "Bump version to ${NEW_VERSION}"
   fi
