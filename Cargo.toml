@@ -18,7 +18,6 @@ version.workspace = true
 edition = "2024"
 description = "Fibonacci sphere point distribution for game engines"
 license.workspace = true
-license-file = "LICENSE.md"
 
 [features]
 default = ["terrain"]
