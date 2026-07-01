@@ -15,7 +15,7 @@ jobs:
   verify-tag:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Verify tag commit is on main
@@ -43,7 +43,7 @@ jobs:
             library: libfibonacci_sphere_gd.dylib
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - name: Build GDExtension (release)
         run: cargo build -p fibonacci_sphere_gd --release
@@ -57,7 +57,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
