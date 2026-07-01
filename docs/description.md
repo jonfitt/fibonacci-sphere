@@ -137,7 +137,7 @@ When you run `cargo build -p fibonacci_sphere`, Cargo loads **root** `Cargo.toml
 ```toml
 [package]
 name = "fibonacci_sphere"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 description = "..."
 license = "GPL-3.0-or-later"
