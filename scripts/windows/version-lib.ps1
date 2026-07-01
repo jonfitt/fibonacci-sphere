@@ -141,8 +141,7 @@ function Invoke-VersionBump {
     $newVersion = "$major.$minor.$patch"
     $tag = "v$newVersion"
 
-    git rev-parse "refs/tags/$tag" 2>$null | Out-Null
-    if ($LASTEXITCODE -eq 0) {
+    if (git tag -l $tag) {
         throw "Tag already exists: $tag"
     }
 
