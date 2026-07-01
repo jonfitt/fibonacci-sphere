@@ -141,12 +141,11 @@ version = "0.1.2"
 edition = "2024"
 description = "..."
 license = "GPL-3.0-or-later"
-license-file = "LICENSE.md"
 ```
 
 - **`[package]`** — metadata for the **library crate** at this path (because `"."` is both workspace member and package root).
 - **`name`** — what you `use` in code: `fibonacci_sphere::SphereLattice`.
-- **`license-file`** — path to the full GPL text in the repository.
+- **`license`** — SPDX identifier; full GPL text is in root `LICENSE.md`.
 
 Release version lives in root **`VERSION`** (not duplicated by hand in each crate). Root `[workspace.package] version` and
 `docs/description.md` are synced from it via `scripts/linux/sync-version.sh` or `scripts/windows/sync-version.cmd`.
