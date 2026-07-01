@@ -7,7 +7,7 @@ description = "Interactive visualizer for fibonacci_sphere lattice distributions
 license.workspace = true
 
 [dependencies]
-bevy = { version = "0.16", default-features = true, features = ["bevy_ui"] }
+bevy = { version = "0.19", default-features = true, features = ["bevy_ui"] }
 dejavu = "2.37.0"
 fibonacci_sphere = { path = "../.." }
 rand = "0.8"
