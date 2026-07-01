@@ -187,13 +187,18 @@ Source: [`examples/sphere_lattice_visualizer/src/`](./examples/sphere_lattice_vi
 
 ## Godot integration
 
-Build the extension from the repo root:
+**Consumers:** download `fibonacci_sphere-<version>.zip` or `fibonacci_sphere-demo-<version>.zip` from
+[GitHub Releases](https://github.com/jonfitt/fibonacci-sphere/releases). See [`docs/godot.md`](./docs/godot.md).
+
+**Development:** build the extension from the repo root:
 
 ```bash
 cargo build -p fibonacci_sphere_gd --release
 ```
 
-Open [`godot/project.godot`](./godot/project.godot) in Godot 4.1+, then run [`godot/demo/main.tscn`](./godot/demo/main.tscn).
+Open [`godot/project.godot`](./godot/project.godot) in Godot 4.3+, then run [`godot/demo/main.tscn`](./godot/demo/main.tscn).
+The dev project loads libraries from `target/` via [`godot/fibonacci_sphere.gdextension`](./godot/fibonacci_sphere.gdextension).
+Release zips use the packaged layout under `addons/fibonacci_sphere/`.
 
 The demo adds terrain polygons, coastline ribbons, click-to-route with terrain-type checkboxes, and
 Perlin hotkeys. Regeneration uses batch Rust APIs (`generate_with_terrain`, `get_terrain_mesh_data`,

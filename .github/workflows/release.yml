@@ -1,0 +1,79 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  verify-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Verify tag commit is on main
+        run: |
+          git fetch origin main
+          if ! git merge-base --is-ancestor "${GITHUB_SHA}" origin/main; then
+            echo "Tag commit ${GITHUB_SHA} is not on main"
+            exit 1
+          fi
+
+  build:
+    needs: verify-tag
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact: linux-x86_64
+            library: libfibonacci_sphere_gd.so
+          - os: windows-latest
+            artifact: windows-x86_64
+            library: fibonacci_sphere_gd.dll
+          - os: macos-latest
+            artifact: macos-arm64
+            library: libfibonacci_sphere_gd.dylib
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build GDExtension (release)
+        run: cargo build -p fibonacci_sphere_gd --release
+      - name: Upload library
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: target/release/${{ matrix.library }}
+
+  package:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Package addon and demo zips
+        run: |
+          chmod +x scripts/linux/package-godot-release.sh
+          ./scripts/linux/package-godot-release.sh \
+            "${GITHUB_REF_NAME}" \
+            "artifacts/linux-x86_64/libfibonacci_sphere_gd.so" \
+            "artifacts/windows-x86_64/fibonacci_sphere_gd.dll" \
+            "artifacts/macos-arm64/libfibonacci_sphere_gd.dylib"
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/fibonacci_sphere-*.zip
+            dist/fibonacci_sphere-demo-*.zip
+            dist/checksums-*.txt
+          generate_release_notes: true
