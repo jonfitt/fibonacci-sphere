@@ -5,7 +5,6 @@ edition = "2024"
 publish = false
 description = "Godot 4 GDExtension bindings for fibonacci_sphere"
 license.workspace = true
-license-file = "../../LICENSE.md"
 
 [lib]
 crate-type = ["cdylib"]
