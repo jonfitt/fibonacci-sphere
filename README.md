@@ -233,20 +233,10 @@ targeting `main`: format check, Clippy, build, and test. The required check name
 Local scripts are split by platform — see [`scripts/README.md`](./scripts/README.md). Use the set
 that matches where your **files** and **`cargo`** live:
 
-| Environment | CI check | Git hooks | Branch protection |
-|-------------|----------|-----------|-------------------|
-| Linux / WSL with Linux `cargo` | `./scripts/linux/ci-check.sh` | `./scripts/linux/setup-git-hooks.sh` | `./scripts/linux/setup-branch-protection.sh` |
-| Windows with Windows `cargo` | `scripts\windows\ci-check.cmd` | `scripts\windows\setup-git-hooks.cmd` | `scripts\windows\setup-branch-protection.cmd` |
-
-Branch protection (once, after `gh auth login`):
-
-```bash
-./scripts/linux/setup-branch-protection.sh
-```
-
-```cmd
-scripts\windows\setup-branch-protection.cmd
-```
+| Environment | CI check | Git hooks |
+|-------------|----------|-----------|
+| Linux / WSL with Linux `cargo` | `./scripts/linux/ci-check.sh` | `./scripts/linux/setup-git-hooks.sh` |
+| Windows with Windows `cargo` | `scripts\windows\ci-check.cmd` | `scripts\windows\setup-git-hooks.cmd` |
 
 ## License
 

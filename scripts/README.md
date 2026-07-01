@@ -28,7 +28,6 @@ and scripts execute on Linux/WSL. Editors should follow [`.editorconfig`](../.ed
 ```bash
 ./scripts/linux/ci-check.sh              # fmt, clippy, build, test
 ./scripts/linux/setup-git-hooks.sh       # once per clone
-./scripts/linux/setup-branch-protection.sh
 ./scripts/linux/setup-bevy-deps.sh       # Bevy visualizer system packages (apt)
 ./scripts/linux/package-godot-release.sh # assemble release zips (needs all platform binaries)
 ./scripts/linux/bump-version.sh        # bump VERSION, sync manifests, commit, tag
@@ -45,7 +44,6 @@ Requires `cargo`, `rustfmt`, and `clippy` on your `PATH`. On WSL, install a Linu
 ```cmd
 scripts\windows\ci-check.cmd
 scripts\windows\setup-git-hooks.cmd
-scripts\windows\setup-branch-protection.cmd
 scripts\windows\bump-version.cmd
 scripts\windows\sync-version.cmd
 ```
@@ -55,7 +53,6 @@ PowerShell equivalents:
 ```powershell
 .\scripts\windows\ci-check.ps1
 .\scripts\windows\setup-git-hooks.ps1
-.\scripts\windows\setup-branch-protection.ps1
 .\scripts\windows\bump-version.ps1
 .\scripts\windows\sync-version.ps1
 ```
@@ -83,3 +80,4 @@ Run the setup script once per clone to set `core.hooksPath`:
 ```cmd
 scripts\windows\setup-git-hooks.cmd
 ```
+
