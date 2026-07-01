@@ -70,7 +70,7 @@ jobs:
             "artifacts/windows-x86_64/fibonacci_sphere_gd.dll" \
             "artifacts/macos-arm64/libfibonacci_sphere_gd.dylib"
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             dist/fibonacci_sphere-*.zip
