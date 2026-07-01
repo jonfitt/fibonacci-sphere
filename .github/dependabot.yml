@@ -5,6 +5,15 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    ignore:
+      # noise 0.9 requires rand 0.8; remove when noise supports rand 0.10+
+      - dependency-name: "rand"
+        versions: [">=0.9"]
+      # Stay on Bevy 0.16 until we choose to migrate; patch updates within 0.16 are fine
+      - dependency-name: "bevy"
+        update-types:
+          - "version-update:semver-major"
+          - "version-update:semver-minor"
 
   - package-ecosystem: github-actions
     directory: /

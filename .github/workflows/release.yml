@@ -15,7 +15,7 @@ jobs:
   verify-tag:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Verify tag commit is on main
@@ -43,12 +43,12 @@ jobs:
             library: libfibonacci_sphere_gd.dylib
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - name: Build GDExtension (release)
         run: cargo build -p fibonacci_sphere_gd --release
       - name: Upload library
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.artifact }}
           path: target/release/${{ matrix.library }}
@@ -57,8 +57,8 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
         with:
           path: artifacts
       - name: Package addon and demo zips
@@ -70,7 +70,7 @@ jobs:
             "artifacts/windows-x86_64/fibonacci_sphere_gd.dll" \
             "artifacts/macos-arm64/libfibonacci_sphere_gd.dylib"
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             dist/fibonacci_sphere-*.zip
