@@ -1,9 +1,11 @@
 [package]
 name = "fibonacci_sphere_gd"
-version = "0.1.0"
+version.workspace = true
 edition = "2024"
 publish = false
 description = "Godot 4 GDExtension bindings for fibonacci_sphere"
+license.workspace = true
+license-file = "../../LICENSE.md"
 
 [lib]
 crate-type = ["cdylib"]

@@ -30,6 +30,7 @@ See also [`architecture.md`](architecture.md) for workspace layout.
 ```
 fibonacci/                          # workspace root (folder name ≠ crate name)
 ├── Cargo.toml                      # workspace + fibonacci_sphere library package
+├── VERSION                         # single source of truth for release version (synced into manifests)
 ├── Cargo.lock                      # pinned dependency versions
 ├── .cargo/config.toml              # Cargo settings (here: internal crate registry)
 ├── src/                            # fibonacci_sphere library source
@@ -139,12 +140,17 @@ name = "fibonacci_sphere"
 version = "0.1.0"
 edition = "2024"
 description = "..."
-license = "MIT OR Apache-2.0"
+license = "GPL-3.0-or-later"
+license-file = "LICENSE.md"
 ```
 
 - **`[package]`** — metadata for the **library crate** at this path (because `"."` is both workspace member and package root).
 - **`name`** — what you `use` in code: `fibonacci_sphere::SphereLattice`.
-- **`edition`** — Rust language version / idioms (like specifying a Python version constraint).
+- **`license-file`** — path to the full GPL text in the repository.
+
+Release version lives in root **`VERSION`** (not duplicated by hand in each crate). Root `[workspace.package] version` and
+`docs/description.md` are synced from it via `scripts/linux/sync-version.sh` or `scripts/windows/sync-version.cmd`.
+Workspace members set `version.workspace = true`.
 
 ```toml
 [features]

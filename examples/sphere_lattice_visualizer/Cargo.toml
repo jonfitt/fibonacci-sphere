@@ -1,9 +1,11 @@
 [package]
 name = "sphere_lattice_visualizer"
-version = "0.1.0"
+version.workspace = true
 edition = "2024"
 publish = false
 description = "Interactive visualizer for fibonacci_sphere lattice distributions (Bevy)"
+license.workspace = true
+license-file = "../../LICENSE.md"
 
 [dependencies]
 bevy = { version = "0.16", default-features = true, features = ["bevy_ui"] }

@@ -3,6 +3,10 @@ members = [".", "examples/sphere_lattice_visualizer", "extensions/fibonacci_sphe
 default-members = [".", "extensions/fibonacci_sphere_gd"]
 resolver = "2"
 
+[workspace.package]
+license = "GPL-3.0-or-later"
+version = "0.1.0"
+
 # Workspace layout:
 # - fibonacci_sphere (root): core library — point generation, topology, terrain
 # - examples/sphere_lattice_visualizer: interactive Bevy comparison app
@@ -10,10 +14,11 @@ resolver = "2"
 
 [package]
 name = "fibonacci_sphere"
-version = "0.1.0"
+version.workspace = true
 edition = "2024"
 description = "Fibonacci sphere point distribution for game engines"
-license = "MIT OR Apache-2.0"
+license.workspace = true
+license-file = "LICENSE.md"
 
 [features]
 default = ["terrain"]
