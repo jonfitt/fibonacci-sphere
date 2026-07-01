@@ -48,7 +48,7 @@ jobs:
       - name: Build GDExtension (release)
         run: cargo build -p fibonacci_sphere_gd --release
       - name: Upload library
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.artifact }}
           path: target/release/${{ matrix.library }}
