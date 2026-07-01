@@ -2001,7 +2001,7 @@ dependencies = [
 
 [[package]]
 name = "fibonacci_sphere"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "noise",
  "rand",
@@ -2010,7 +2010,7 @@ dependencies = [
 
 [[package]]
 name = "fibonacci_sphere_gd"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "fibonacci_sphere",
  "godot",
@@ -4134,7 +4134,7 @@ dependencies = [
 
 [[package]]
 name = "sphere_lattice_visualizer"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "bevy",
  "dejavu",
