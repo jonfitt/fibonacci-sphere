@@ -6,6 +6,11 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "${ROOT}"
 
+echo "==> verify VERSION sync"
+# shellcheck source=scripts/linux/sync-version.sh
+source "${ROOT}/scripts/linux/sync-version.sh"
+verify_version_sync "${ROOT}"
+
 echo "==> cargo fmt --check"
 cargo fmt --all -- --check
 

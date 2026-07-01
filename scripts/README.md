@@ -31,6 +31,8 @@ and scripts execute on Linux/WSL. Editors should follow [`.editorconfig`](../.ed
 ./scripts/linux/setup-branch-protection.sh
 ./scripts/linux/setup-bevy-deps.sh       # Bevy visualizer system packages (apt)
 ./scripts/linux/package-godot-release.sh # assemble release zips (needs all platform binaries)
+./scripts/linux/bump-version.sh        # bump VERSION, sync manifests, commit, tag
+./scripts/linux/sync-version.sh        # apply VERSION to Cargo.toml and docs/description.md
 ```
 
 Requires `cargo`, `rustfmt`, and `clippy` on your `PATH`. On WSL, install a Linux toolchain (`build-essential`, `rustup`).
@@ -44,6 +46,8 @@ Requires `cargo`, `rustfmt`, and `clippy` on your `PATH`. On WSL, install a Linu
 scripts\windows\ci-check.cmd
 scripts\windows\setup-git-hooks.cmd
 scripts\windows\setup-branch-protection.cmd
+scripts\windows\bump-version.cmd
+scripts\windows\sync-version.cmd
 ```
 
 PowerShell equivalents:
@@ -52,7 +56,16 @@ PowerShell equivalents:
 .\scripts\windows\ci-check.ps1
 .\scripts\windows\setup-git-hooks.ps1
 .\scripts\windows\setup-branch-protection.ps1
+.\scripts\windows\bump-version.ps1
+.\scripts\windows\sync-version.ps1
 ```
+
+## Versioning
+
+`VERSION` at the repository root is the single source of truth. Workspace crates inherit
+`version.workspace = true` from `[workspace.package]` in root `Cargo.toml`. Cargo cannot read
+`VERSION` directly; run `sync-version` after editing `VERSION` by hand, or use `bump-version`
+before a release (syncs files, commits, and creates `vX.Y.Z`).
 
 ## Git hooks
 

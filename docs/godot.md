@@ -24,7 +24,16 @@ Open the demo zip's `project.godot` in Godot 4.3+ and press Play. No Rust toolch
 To cut a release from this repository:
 
 ```bash
-git tag v0.1.0
+./scripts/linux/bump-version.sh
+# or on Windows:
+# scripts\windows\bump-version.cmd
+```
+
+That bumps `VERSION`, syncs `Cargo.toml` and `docs/description.md`, commits, and creates tag `v0.1.0`.
+Push the commit and tag to trigger CI:
+
+```bash
+git push origin HEAD
 git push origin v0.1.0
 ```
 

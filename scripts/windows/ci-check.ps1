@@ -8,6 +8,10 @@ if (-not $Root) {
 }
 Set-Location $Root
 
+Write-Host "==> verify VERSION sync"
+. "$Root/scripts/windows/version-lib.ps1"
+Test-ProjectVersionSync -Root $Root
+
 Write-Host "==> cargo fmt --check"
 cargo fmt --all -- --check
 
