@@ -66,10 +66,15 @@ before a release (syncs files, commits, and creates `vX.Y.Z`).
 
 ## Git hooks
 
-`.githooks/pre-commit` is committed and dispatches to the right CI script:
+`.githooks/pre-commit` verifies the local commit email (when [`.gitconfig`](../.gitconfig)
+exists), then dispatches to the right CI script:
 
 - **Linux / WSL / macOS** → `scripts/linux/ci-check.sh`
 - **Windows (Git for Windows)** → `scripts/windows/ci-check.ps1`
+
+Copy [`.gitconfig.example`](../.gitconfig.example) to `.gitconfig` (gitignored) and set your
+name and email. The setup script creates `.gitconfig` from the example if missing and includes
+it in your local `.git/config` so it overrides a global Git identity for this repo only.
 
 Run the setup script once per clone to set `core.hooksPath`:
 

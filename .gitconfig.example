@@ -1,0 +1,6 @@
+# Local Git identity for this repository (not committed).
+# Copy to .gitconfig and set your name and email:
+#   cp .gitconfig.example .gitconfig
+[user]
+	email = you@example.com
+	name = Your Name

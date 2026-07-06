@@ -4,3 +4,5 @@
 /godot/.godot/
 # IDE and local tooling
 .idea/
+# Local Git identity (copy from .gitconfig.example; never commit)
+.gitconfig

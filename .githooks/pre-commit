@@ -4,6 +4,16 @@ set -eu
 
 ROOT="$(git rev-parse --show-toplevel)"
 
+if [ -f "${ROOT}/.gitconfig" ]; then
+	EXPECTED_EMAIL="$(git config -f "${ROOT}/.gitconfig" user.email)"
+	ACTUAL_EMAIL="$(git config user.email)"
+	if [ "${ACTUAL_EMAIL}" != "${EXPECTED_EMAIL}" ]; then
+		echo "Commit author email must be ${EXPECTED_EMAIL} (current: ${ACTUAL_EMAIL})." >&2
+		echo "Run scripts/linux/setup-git-hooks.sh or scripts\\windows\\setup-git-hooks.cmd" >&2
+		exit 1
+	fi
+fi
+
 case "$(uname -s 2>/dev/null || echo unknown)" in
 MINGW* | MSYS* | CYGWIN* | Windows_NT*)
 	exec powershell.exe -NoProfile -ExecutionPolicy Bypass -File "${ROOT}/scripts/windows/ci-check.ps1"
